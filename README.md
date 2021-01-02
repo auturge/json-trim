@@ -441,6 +441,7 @@ Distributed under the MIT license. See [`LICENSE`][license] for more information
 
 ---
 
+[license]: https://github.com/auturge/json-trim/blob/master/LICENSE
 [license-url]: https://github.com/auturge/auturge/blob/master/LICENSE
 [license-image]: http://img.shields.io/:license-mit-blue.svg?style=flat-square
 [contributing]: https://github.com/auturge/auturge/blob/master/docs/CONTRIBUTING.md
