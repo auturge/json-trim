@@ -1,0 +1,149 @@
+{
+    // An opinionated list of settings
+    // ======================================================================================================
+
+    //
+    // Editor
+    // ======================================================================================================
+
+    // Controls whether the editor should automatically adjust the indentation when users type, paste, move or indent lines.
+    //  - none: The editor will not insert indentation automatically.
+    //  - keep: The editor will keep the current line's indentation.
+    //  - brackets: The editor will keep the current line's indentation and honor language defined brackets.
+    //  - advanced: The editor will keep the current line's indentation, honor language defined brackets and invoke special onEnterRules defined by languages.
+    //  - full: The editor will keep the current line's indentation, honor language defined brackets, invoke special onEnterRules defined by languages, and honor indentationRules defined by languages.
+    "editor.autoIndent": "full",
+    "editor.copyWithSyntaxHighlighting": true,
+    "editor.comments.insertSpace": true,
+    "editor.detectIndentation": false,
+    "editor.fontFamily": "Fira Code, Consolas, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "editor.insertSpaces": true,
+
+    // Controls how the editor should render whitespace characters.
+    //  - none
+    //  - boundary: Render whitespace characters except for single spaces between words.
+    //  - all
+    "editor.renderWhitespace": "all",
+    "editor.tabSize":4,
+    "editor.trimAutoWhitespace": false,
+    "editor.useTabStops": true,
+
+    //
+    // Files
+    // ======================================================================================================
+
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": false,
+
+    // The default end of line character.
+    //  - \n: LF
+    //  - \r\n: CRLF
+    //  - auto: Uses operating system specific end of line character.
+    "files.eol": "\n",
+
+    //
+    // File-type specific rules
+    // ======================================================================================================
+    "[html]": {
+      "editor.suggest.insertMode": "replace",
+      "gitlens.codeLens.scopes": ["document"]
+    },
+    "html.format.preserveNewLines": true,
+
+    "[json]": {
+      "editor.quickSuggestions": {
+        "strings": true
+      },
+      "editor.suggest.insertMode": "replace",
+      "editor.autoIndent": "none",
+      "editor.formatOnSave": true,
+      "editor.formatOnPaste": true,
+      "editor.renderWhitespace": "all",
+      "editor.tabSize": 2,
+      "editor.wordWrap": "on",
+      "gitlens.codeLens.scopes": ["document"]
+    },
+
+    "[javascript]": {
+      "editor.autoIndent": "full",
+      "editor.formatOnPaste": true,
+      "editor.formatOnSave": true,
+      "editor.renderWhitespace": "none",
+      "editor.tabSize": 4,
+      "editor.wordWrap": "on",
+      "gitlens.codeLens.scopes": ["document"]
+    },
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+
+    "[typescript]": {
+      "editor.autoIndent": "full",
+      "editor.formatOnPaste": true,
+      "editor.formatOnSave": true,
+      "editor.renderWhitespace": "none",
+      "editor.tabSize": 4,
+      "editor.wordWrap": "on",
+      "gitlens.codeLens.scopes": ["document"]
+    },
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true,
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+
+    "[markdown]": {
+      "editor.formatOnSave": true,
+      "editor.wordWrap": "on",
+      "editor.renderWhitespace": "all",
+      "editor.acceptSuggestionOnEnter": "off",
+      "gitlens.codeLens.scopes": ["document"]
+    },
+
+    //
+    // MarkDownLint rules
+    // ======================================================================================================
+    "markdownlint.config": {
+      "default": true,
+      "MD001": false,
+      "MD003": {
+        "style": "consistent"
+      },
+      "MD007": false,
+      "MD014": false,
+      "MD024": false,
+      "MD026": false,
+      "MD030": false,
+      "MD033": false,
+      "no-hard-tabs": false
+    },
+
+    //
+    // todo-tree rules
+    // ======================================================================================================
+    "todo-tree.highlights.enabled": true,
+    "todo-tree.tree.showScanModeButton": false,
+
+    //
+    // Prettier rules
+    // ======================================================================================================
+    "prettier.arrowParens": "always",
+    "prettier.bracketSpacing": true,
+    "prettier.endOfLine": "lf",
+    "prettier.printWidth": 80,
+    "prettier.quoteProps": "consistent",
+    "prettier.semi": true,
+    "prettier.singleQuote": true,
+    "prettier.tabWidth": 4,
+    "prettier.trailingComma": "es5",
+    "prettier.useTabs": false,
+
+    //
+    // Miscellaneous
+    // ======================================================================================================
+    // Ignores the warning when there are too many changes in a repository.
+    "git.ignoreLimitWarning": false
+}

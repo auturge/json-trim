@@ -1,0 +1,70 @@
+# Package-Specific Exclusions
+#======================================================================
+
+# N/A
+
+
+# Output Folders
+#======================================================================
+
+## built output folder
+build/
+dist/
+
+## intermediate build output folders
+bazel-out/
+**/.tsc-output/
+
+## test output folders
+**/.nyc_output/
+**/coverage/
+
+# Package Managers
+#======================================================================
+
+## node
+node_modules/
+npm-debug.log
+
+## yarn
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+yarn-error.log
+
+# IDEs and editors
+#======================================================================
+
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vimrc
+.nvimrc
+
+## IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Misc
+#======================================================================
+
+## System Files
+.DS_Store
+Thumbs.db
+
+## temp folders
+**/temp/
+**/tmp/
+**/old/
+**/bak/
