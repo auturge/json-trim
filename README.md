@@ -3,10 +3,13 @@
 <p align="center">
   Copies a trimmed version of a json file.
 </p>
+
 [![License][license-image]][license-url]
+<!--
 [![npm][npm-badge]][npm-url]
 [![Build][travis-badge]][travis-url]
 [![Coverage Status][coverage-badge]][coverage-url]
+-->
 
 
 
