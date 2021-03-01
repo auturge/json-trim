@@ -1,24 +1,41 @@
-const { exit } = require("process");
-const logger = require("../utils/logger");
+const throwError = require("../errors/throw-error");
+const EXIT_CODES = require("../errors/EXIT_CODES");
 
 /** Validate a config object. */
-function validate(config) {
+function validate(logger, config) {
 
-  if (!config) {
-    logger.error('ERROR: Could not resolve configuration.');
-    exit(2);
-  }
+    logger.mark('config-validator::validate');
+    logger.debug('Validating the final runtime configuration object.');
 
-  if (!config.source) {
-    logger.error('ERROR: Source file not specified.');
-    exit(2);
-  }
+    logger.trace('  config:', JSON.stringify(config, null, 2));
 
-  if (!config.destination) {
-    logger.error('ERROR: Destination file not specified.');
-    exit(2);
-  }
+    function isFieldMissing(field) {
+        // determine if the property is null or undefined (unset).
+        if (!config) return true;
+        return config[ field ] == null;
+    }
 
+    function throwIfMissing(field) {
+        if (isFieldMissing(field)) {
+            throwError(`Could not resolve configuration: '${ field }' is not defined.`, null, EXIT_CODES.CONFIGURATION_ERROR);
+        }
+    }
+
+    function throwIfEmpty(field) {
+        throwIfMissing(field);
+        if (config[ field ].trim() === "") {
+            throwError(`Property '${ field }' must not be an empty string.`, null, EXIT_CODES.CONFIGURATION_ERROR);
+        }
+    }
+
+    if (!config) {
+        // This SHOULD never happen, since this method is called after merging
+        // the loaded config with a default config...
+        throwError('Could not resolve configuration.', null, EXIT_CODES.CONFIGURATION_ERROR);
+    }
+
+    throwIfMissing('source');
+    throwIfEmpty('source');
 }
 
-module.exports = (config) => validate(config);
+module.exports = (logger, config) => validate(logger, config);

@@ -1,4 +1,4 @@
-const logger = require('../../utils/logger');
+const logger = require('../../logging/logger');
 const { defaultCommands } = require('../commands');
 const { isCommandUsed } = require('../arg-utils');
 const { commands, allNames, hasUnknownArgs } = require('../unknown-args');
@@ -12,12 +12,12 @@ const outputVersion = (args) => {
     const invalidArgs = hasUnknownArgs(args, allNames);
     if (commandsUsed && commandsUsed.length === 1 && invalidArgs.length === 0) {
         try {
-            if ([commandUsed.alias, commandUsed.name].some((pkg) => commandsUsed.includes(pkg))) {
-                const { name, version } = require(`json-trim/${defaultCommands[commandUsed.name]}/package.json`);
-                logger.raw(`\n${name} ${version}`);
+            if ([ commandUsed.alias, commandUsed.name ].some((pkg) => commandsUsed.includes(pkg))) {
+                const { name, version } = require(`json-trim/${ defaultCommands[ commandUsed.name ] }/package.json`);
+                logger.raw(`\n${ name } ${ version }`);
             } else {
-                const { name, version } = require(`${commandUsed.name}/package.json`);
-                logger.raw(`\n${name} ${version}`);
+                const { name, version } = require(`${ commandUsed.name }/package.json`);
+                logger.raw(`\n${ name } ${ version }`);
             }
         } catch (e) {
             logger.error('Error: External package not found.');
@@ -31,14 +31,14 @@ const outputVersion = (args) => {
     }
 
     if (invalidArgs.length > 0) {
-        const argType = invalidArgs[0].startsWith('-') ? 'option' : 'command';
-        logger.error(`Error: Invalid ${argType} '${invalidArgs[0]}'.`);
+        const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
+        logger.error(`Error: Invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
         logger.info('Run json-trim --help to see available commands and arguments.\n');
         process.exit(2);
     }
 
     const pkgJSON = require('../../../../package.json');
-    logger.raw(`\njson-trim ${pkgJSON.version}\n`);
+    logger.raw(`\njson-trim ${ pkgJSON.version }\n`);
 };
 
 module.exports = outputVersion;

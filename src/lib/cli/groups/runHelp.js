@@ -3,14 +3,14 @@ const commandLineUsage = require('command-line-usage');
 
 const { flags, commands } = require('../cli-flags');
 const { hasUnknownArgs, allNames, commands: commandNames } = require('../unknown-args');
-const logger = require('../../utils/logger');
+const logger = require('../../logging/logger');
 
 // This function prints a warning about invalid flag
 const printInvalidArgWarning = (args) => {
     const invalidArgs = hasUnknownArgs(args, allNames);
     if (invalidArgs.length > 0) {
-        const argType = invalidArgs[0].startsWith('-') ? 'option' : 'command';
-        logger.warn(`You provided an invalid ${argType} '${invalidArgs[0]}'.`);
+        const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
+        logger.warn(`You provided an invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
     }
 };
 
@@ -26,16 +26,16 @@ const printSubHelp = (subject, isCommand) => {
     });
 
     const header = (head) => bold(underline(head));
-    const flagAlias = options.alias ? (isCommand ? ` ${options.alias} |` : ` -${options.alias},`) : '';
-    const usage = yellow(`json-trim${flagAlias} ${options.usage}`);
+    const flagAlias = options.alias ? (isCommand ? ` ${ options.alias } |` : ` -${ options.alias },`) : '';
+    const usage = yellow(`json-trim${ flagAlias } ${ options.usage }`);
     const description = options.description;
     const link = options.link;
 
-    logger.raw(`${header('Usage')}: ${usage}`);
-    logger.raw(`${header('Description')}: ${description}`);
+    logger.raw(`${ header('Usage') }: ${ usage }`);
+    logger.raw(`${ header('Description') }: ${ description }`);
 
     if (link) {
-        logger.raw(`${header('Documentation')}: ${link}`);
+        logger.raw(`${ header('Documentation') }: ${ link }`);
     }
 
     if (options.flags) {
@@ -53,7 +53,7 @@ const printHelp = () => {
     const negatedFlags = options.core
         .filter((flag) => flag.negative)
         .reduce((allFlags, flag) => {
-            return [...allFlags, { name: `no-${flag.name}`, description: `Negates ${flag.name}`, type: Boolean }];
+            return [ ...allFlags, { name: `no-${ flag.name }`, description: `Negates ${ flag.name }`, type: Boolean } ];
         }, []);
     // const title = underline('json-trim');
     const title = bold('⬡                     ') + underline('json-trim') + bold('                     ⬡');
@@ -63,9 +63,9 @@ const printHelp = () => {
     const usage = bold('Usage') + ': ' + '`' + o('json-trim [...options]') + '`';
     const examples = bold('Example') + ': ' + '`' + o('json-trim help --flag') + '`';
 
-    const hh = `          ${title}\n
-		${usage}\n
-		${examples}\n
+    const hh = `          ${ title }\n
+		${ usage }\n
+		${ examples }\n
 `;
     //  ${websitelink}\n
     // ${desc}\n
@@ -76,22 +76,24 @@ const printHelp = () => {
             raw: true,
         }
     ];
+
     if (options.commands.length) {
         usageOpts.push(
             {
                 header: 'Available Commands',
                 content: options.commands.map((cmd) => {
-                    return { name: `${cmd.name} | ${cmd.alias}`, summary: cmd.description };
+                    return { name: `${ cmd.name } | ${ cmd.alias }`, summary: cmd.description };
                 }),
             }
         )
-    };
+    }
+
     if (options.core.length) {
         usageOpts.push({
             header: 'Options',
             optionList: options.core
                 .map((e) => {
-                    if (e.type.length > 1) e.type = e.type[0];
+                    if (e.type.length > 1) e.type = e.type[ 0 ];
                     // Here we replace special characters with chalk's escape
                     // syntax (`\$&`) to avoid chalk trying to re-process our input.
                     // This is needed because chalk supports a form of `{var}`
@@ -101,7 +103,7 @@ const printHelp = () => {
                 })
                 .concat(negatedFlags),
         })
-    };
+    }
 
     return commandLineUsage(usageOpts);
 };
@@ -111,7 +113,7 @@ const outputHelp = (cliArgs) => {
     printInvalidArgWarning(cliArgs);
     const flagOrCommandUsed = allNames.filter((name) => {
         return cliArgs.includes(name);
-    })[0];
+    })[ 0 ];
     const isCommand = commandNames.includes(flagOrCommandUsed);
 
     // Print full help when no flag or command is supplied with help

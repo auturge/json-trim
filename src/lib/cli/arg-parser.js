@@ -1,5 +1,5 @@
 const commander = require('commander');
-const logger = require('../utils/logger');
+const logger = require('../logging/logger');
 const runHelp = require('./groups/runHelp');
 const runVersion = require('./groups/runVersion');
 
@@ -25,10 +25,17 @@ const argParser = (options, args, argsOnly = false, name = '') => {
         process.exit(0);
     }
 
-    // Use Customized version
+    // Use Customized version info
     if (args.includes('--version') || args.includes('-ver')) {
         runVersion(args);
         process.exit(0);
+    }
+
+    // Set the test mode variable, for use in unit/functional testing to prevent spam logging during unit tests
+    const testArgumentIndex = args.indexOf('--quiet-test');
+    const testMode = testArgumentIndex != -1;
+    if (testMode) {
+        args.splice(testArgumentIndex, 1);
     }
 
     // Allow execution if unknown arguments are present
@@ -53,35 +60,35 @@ const argParser = (options, args, argsOnly = false, name = '') => {
                 optionType = Boolean;
             } else if (optionType.length === 1 || optionType.length > 2) {
                 // treat arrays with 1 or > 2 args as a single type
-                optionType = optionType[0];
+                optionType = optionType[ 0 ];
             } else {
                 // only String and Boolean multi type is supported
                 if (optionType.includes(Boolean) && optionType.includes(String)) {
                     isStringOrBool = true;
                 } else {
-                    optionType = optionType[0];
+                    optionType = optionType[ 0 ];
                 }
             }
         }
 
-        const flags = option.alias ? `-${option.alias}, --${option.name}` : `--${option.name}`;
+        const flags = option.alias ? `-${ option.alias }, --${ option.name }` : `--${ option.name }`;
 
         let flagsWithType = flags;
 
         if (isStringOrBool) {
             // commander recognizes [value] as an optional placeholder,
             // making this flag work either as a string or a boolean
-            flagsWithType = `${flags} [value]`;
+            flagsWithType = `${ flags } [value]`;
         } else if (optionType !== Boolean) {
             // <value> is a required placeholder for any non-Boolean types
-            flagsWithType = `${flags} <value>`;
+            flagsWithType = `${ flags } <value>`;
         }
 
         if (isStringOrBool || optionType === Boolean || optionType === String) {
             if (option.multiple) {
                 // a multiple argument parsing function
-                const multiArg = (value, previous = []) => previous.concat([value]);
-                flagsWithType = `${flags} [values...]`;
+                const multiArg = (value, previous = []) => previous.concat([ value ]);
+                flagsWithType = `${ flags } [values...]`;
                 parserInstance.option(flagsWithType, option.description, multiArg, option.defaultValue).action(() => { });
             } else if (option.multipleType) {
                 // for options which accept multiple types like env
@@ -89,25 +96,25 @@ const argParser = (options, args, argsOnly = false, name = '') => {
                 // { platform: "staging", production: true }
                 const multiArg = (value, previous = {}) => {
                     // this ensures we're only splitting by the first `=`
-                    const [allKeys, val] = value.split(/=(.+)/, 2);
+                    const [ allKeys, val ] = value.split(/=(.+)/, 2);
                     const splitKeys = allKeys.split(/\.(?!$)/);
 
                     let prevRef = previous;
 
                     splitKeys.forEach((someKey, index) => {
-                        if (!prevRef[someKey]) {
-                            prevRef[someKey] = {};
+                        if (!prevRef[ someKey ]) {
+                            prevRef[ someKey ] = {};
                         }
 
-                        if ('string' === typeof prevRef[someKey]) {
-                            prevRef[someKey] = {};
+                        if ('string' === typeof prevRef[ someKey ]) {
+                            prevRef[ someKey ] = {};
                         }
 
                         if (index === splitKeys.length - 1) {
-                            prevRef[someKey] = val || true;
+                            prevRef[ someKey ] = val || true;
                         }
 
-                        prevRef = prevRef[someKey];
+                        prevRef = prevRef[ someKey ];
                     });
 
                     return previous;
@@ -127,8 +134,8 @@ const argParser = (options, args, argsOnly = false, name = '') => {
 
         if (option.negative) {
             // commander requires explicitly adding the negated version of boolean flags
-            const negatedFlag = `--no-${option.name}`;
-            parserInstance.option(negatedFlag, `negates ${option.name}`).action(() => { });
+            const negatedFlag = `--no-${ option.name }`;
+            parserInstance.option(negatedFlag, `negates ${ option.name }`).action(() => { });
         }
 
         return parserInstance;
@@ -148,13 +155,13 @@ const argParser = (options, args, argsOnly = false, name = '') => {
     args.forEach((arg) => {
         const flagName = arg.slice(5);
         const option = options.find((opt) => opt.name === flagName);
-        const flag = `--${flagName}`;
+        const flag = `--${ flagName }`;
         const flagUsed = args.includes(flag) && !unknownArgs.includes(flag);
         let alias = '';
         let aliasUsed = false;
 
         if (option && option.alias) {
-            alias = `-${option.alias}`;
+            alias = `-${ option.alias }`;
             aliasUsed = args.includes(alias) && !unknownArgs.includes(alias);
         }
 
@@ -162,21 +169,22 @@ const argParser = (options, args, argsOnly = false, name = '') => {
         // it is negating was also provided
         if (arg.startsWith('--no-') && (flagUsed || aliasUsed) && !unknownArgs.includes(arg)) {
             logger.warn(
-                `You provided both ${flagUsed ? flag : alias
-                } and ${arg}. We will use only the last of these flags that you provided in your CLI arguments`,
+                `You provided both ${ flagUsed ? flag : alias
+                } and ${ arg }. We will use only the last of these flags that you provided in your CLI arguments`,
             );
         }
     });
 
     Object.keys(opts).forEach((key) => {
-        if (opts[key] === undefined) {
-            delete opts[key];
+        if (opts[ key ] === undefined) {
+            delete opts[ key ];
         }
     });
 
     return {
         unknownArgs,
         opts,
+        isTestMode: testMode
     };
 };
 

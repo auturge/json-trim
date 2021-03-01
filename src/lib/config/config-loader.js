@@ -1,67 +1,65 @@
 const fs = require("fs");
 const path = require("path");
-const { exit } = require("process");
-const logger = require('../utils/logger');
 const configResolver = require('@auturge/config-resolver');
+const throwError = require("../errors/throw-error");
+const throwException = require("../errors/throw-exception");
+const EXIT_CODES = require("../errors/EXIT_CODES");
+const { isFunction } = require("../utils/isFunction");
 
 // reads a config file
-function loadConfigFile(configPath, options) {
+function loadConfigFile(logger, options) {
 
-  const absolutePath = configPath ? path.join(process.cwd(), configPath) : '';
+    var configPath = options.config;
+    const absolutePath = configPath ? path.join(process.cwd(), configPath) : '';
 
-  // provide the 'default' path for the config file (always a 'function'-type configuration)
-  const resolverOptions = { alternatives: [ { path: './trim.config.js', type: 'function' } ] };
+    // provide the 'default' path for the config file (always a 'function'-type configuration)
+    const resolverOptions = { alternatives: [ { path: './trim.config.js', type: 'function' } ] };
 
-  if (configPath) {
-    configPath = configPath.trim();
-    logger.trace(`Checking config path: [${ configPath }]`);
-    if (!fs.existsSync(absolutePath)) {
-      logger.error(`ERROR: Config file [${ absolutePath }] does not exist.`);
-      exit(2);
+    if (configPath) {
+        configPath = configPath.trim();
+        logger.trace(`Checking config path: [${ configPath }]`);
+        if (!fs.existsSync(absolutePath)) {
+            throwError(`ERROR: Config file [${ absolutePath }] does not exist.`);
+        }
+
+        logger.debug(`Using config at: [${ configPath }]`);
+        resolverOptions.explicit = { path: absolutePath, type: 'function' }
     }
-    logger.success(`Using config at: [${ configPath }]`);
-    resolverOptions.explicit = { path: absolutePath, type: 'function' }
-  }
 
-  // use these options to TRY to get the config file.
-  let config;
-  try {
-    config = configResolver.resolveConfig(resolverOptions);
-  } catch (error) {
-    logger.error(`ERROR: Could not load config file [${ absolutePath }].`);
-    logger.error(error);
-    exit(1);
-  }
+    // use these options to TRY to get the config file.
+    let config;
+    try {
 
-  // if the user didn't specify a config file, and we couldn't find an alternative, then return null.
-  if (!resolverOptions.explicit && !config) {
-    return null;
-  }
+        logger.trace('  Attempting to resolve config file with options:', JSON.stringify(resolverOptions, null, 2));
 
-  // json-trim only supports function-type config files. Validate this.
-  if (!isFunction(config)) {
-    const message = configPath ? `ERROR: Config file [${ absolutePath }] does not export a function.` : `ERROR: Config file does not export a function.`;
-    logger.error(message);
-    exit(2);
-  }
+        config = configResolver.resolveConfig(resolverOptions);
+    } catch (error) {
+        throwError(`ERROR: Could not load config file [${ absolutePath }].`, error, EXIT_CODES.EXTERNAL_ERROR);
+    }
 
-  // Run the function and return the results.
-  let result;
-  try {
-    result = config(options);
-  } catch (error) {
-    logger.error(`ERROR: Config function threw an error.`);
-    logger.error(error);
-    exit(2);
-  }
+    // if the user didn't specify a config file, and we couldn't find an alternative, then return null.
+    if (!resolverOptions.explicit && !config) {
+        logger.debug('No config file found.');
+        return null;
+    }
 
-  return result;
+    // json-trim only supports function-type config files. Validate this.
+    if (!isFunction(config)) {
+        const message = configPath ? `ERROR: Config file [${ absolutePath }] does not export a function.` : `ERROR: Config file does not export a function.`;
+        throwError(message, null, EXIT_CODES.INVALID_CONFIG_FILE);
+    }
+
+    // Run the function and return the results.
+    let result;
+    try {
+        result = config(options);
+    } catch (error) {
+        throwException(`ERROR: Config function threw an error.`, error, EXIT_CODES.CONFIG_FUNCTION_ERROR);
+    }
+
+    return result;
 }
 
-function isFunction(toCheck) {
-  return toCheck && {}.toString.call(toCheck) === '[object Function]';
-}
-
-module.exports = (configPath, options) => {
-  return loadConfigFile(configPath, options);
+module.exports = (logger, options) => {
+    return loadConfigFile(logger, options);
 }

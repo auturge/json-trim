@@ -1,10 +1,9 @@
 const fs = require("fs");
-const logger = require("./logger");
 const { exit } = require("process");
 
-function load(absolutePath) {
+function load(logger, absolutePath) {
     if (!fs.existsSync(absolutePath)) {
-        logger.error(`\nERROR: File [${absolutePath}] does not exist.`);
+        logger.error(`\nERROR: File [${ absolutePath }] does not exist.`);
         exit(1);
     }
 
@@ -12,23 +11,11 @@ function load(absolutePath) {
         var content = require(absolutePath);
     } catch (ex) {
         logger.info(ex);
-        logger.error(`\nERROR: File [${absolutePath}] is not JSON.`);
+        logger.error(`\nERROR: File [${ absolutePath }] is not JSON.`);
         exit(1);
     }
 
     return content;
 }
 
-function isJSON(content) {
-    // All JSON objects are objects.
-    // this basically asks, is this of type object (and not null)
-
-    console.log('content', content);
-
-    var isObj = typeof content === 'object' && content !== null;
-    console.log('is object', isObj);
-
-    return isObj;
-}
-
-module.exports = (absolutePath) => load(absolutePath);
+module.exports = (logger, absolutePath) => load(logger, absolutePath);

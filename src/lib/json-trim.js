@@ -1,30 +1,26 @@
 "use strict";
 
+const generateRuntimeConfiguration = require('./config/config-builder');
 const execute = require('./trim/trim');
-const logger = require('./utils/logger');
-const configBuilder = require('./config/config-builder');
+const getLogger = require('./logging/get-logger');
 
 class JsonTrim {
-  constructor() { }
 
-  run(args) {
-    try {
-      const config = configBuilder(args);
+    logger = null;
 
-      logger.trace('config');
-      logger.trace(JSON.stringify(config, null, 2));
-
-      execute(config);
+    constructor(logger) {
+        const loggerSource = 'json-trim';
+        this.logger = logger || getLogger(loggerSource, args, false);
     }
-    catch (error) {
-      logger.error('args');
-      logger.log(JSON.stringify(args));
 
-      // logger.error(`Failed to load '${ configPath }'`);
-      logger.error(error);
-      process.exit(2);
+    run(args) {
+        // args may be empty, since it could all be handled by the default config file.
+        this.logger.mark('json-trim::run');
+        this.logger.debug('Starting json-trim.');
+
+        const options = generateRuntimeConfiguration(this.logger, args);
+        return execute(this.logger, options);
     }
-  }
 }
 
 module.exports = JsonTrim;

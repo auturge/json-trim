@@ -1,24 +1,35 @@
+const ensureRuntimeOptionsHaveTheRightShape = require('./marshal-options');
 const loadConfigFile = require("./config-loader");
 const mergeConfigInfo = require("./config-merger");
 const resolveKeyList = require("./keylist-resolver");
 const DEFAULT_CONFIG = require('./DEFAULT_CONFIG');
 
-function generateConfig(opts) {
-  const defaultConfig = Object.assign({}, DEFAULT_CONFIG);
+function generateRuntimeConfiguration(logger, parsedOpts) {
 
+    logger.mark('config-builder::generateRuntimeConfiguration');
+    logger.debug('Generating a runtime configuration object.');
 
-  const configFile = loadConfigFile(opts.config, opts.env);
+    logger.trace('parsedOpts:', parsedOpts);
 
+    // ensure the parsed options object has all the required properties
+    const options = ensureRuntimeOptionsHaveTheRightShape(parsedOpts);
 
-  const config = mergeConfigInfo(defaultConfig, configFile, opts);
+    logger.trace('options:', options);
 
+    // load the config file, if possible and necessary
+    const configFile = loadConfigFile(logger, options);
 
-  resolveKeyList(config);
+    // merge the bits that we have
+    const defaultConfig = Object.assign({}, DEFAULT_CONFIG);
+    const config = mergeConfigInfo(logger, defaultConfig, configFile, options);
 
+    // identify the keys to keep
+    resolveKeyList(logger, config);
 
-  return config;
+    // return the result
+    return config;
 }
 
-module.exports = (opts) => {
-  return generateConfig(opts);
+module.exports = (logger, parsedOpts) => {
+    return generateRuntimeConfiguration(logger, parsedOpts);
 }

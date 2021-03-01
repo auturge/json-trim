@@ -2,10 +2,9 @@
 
 'use strict';
 
-const runCLI = require('../lib/bootstrap');
+const runCLI = require('../lib/runCLI');
 
-process.title = 'json-trim';
-
+process.title = "json-trim";
 const [ , , ...rawArgs ] = process.argv;
 
 runCLI(rawArgs);

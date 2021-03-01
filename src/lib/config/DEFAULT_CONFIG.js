@@ -1,7 +1,7 @@
-const LOG_LEVEL = require("./LOG_LEVEL");
+const LogLevel = require("../logging/LogLevel");
 
 module.exports = {
-    source: '',
-    destination: '',
-    loglevel: LOG_LEVEL.INFO
+    source: undefined,
+    destination: undefined,
+    loglevel: LogLevel.INFO
 };
