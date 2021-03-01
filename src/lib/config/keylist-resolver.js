@@ -1,10 +1,10 @@
 const loadJSONFile = require('../utils/json-loader');
 
 /** Given a config object, resolves the list of keys */
-function resolveKeyList(config) {
+function resolveKeyList(logger, config) {
 
     // Get the keys that exist in the file
-    var json = loadJSONFile(config.source);
+    var json = loadJSONFile(logger, config.source);
     var keylist = Object.keys(json);
 
     // If the config has a KEYLIST, then delete it. (Get out of here with that shit!)
@@ -35,8 +35,9 @@ function filter(func, array) {
     // taken from
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
     'use strict';
-    if (!((typeof func === 'Function' || typeof func === 'function') && array))
+    if (!((typeof func === 'function') && array)) {
         throw new TypeError();
+    }
 
     var len = array.length >>> 0,
         res = new Array(len), // preallocate array
@@ -47,9 +48,9 @@ function filter(func, array) {
         while (++i !== len) {
             // checks to see if the key was set
             if (i in array) {
-                kValue = t[i]; // in case t is changed in callback
-                if (func(t[i], i, t)) {
-                    res[c++] = kValue;
+                kValue = t[ i ]; // in case t is changed in callback
+                if (func(t[ i ], i, t)) {
+                    res[ c++ ] = kValue;
                 }
             }
         }
@@ -58,9 +59,9 @@ function filter(func, array) {
         while (++i !== len) {
             // checks to see if the key was set
             if (i in array) {
-                kValue = t[i];
-                if (func.call(array, t[i], i, t)) {
-                    res[c++] = kValue;
+                kValue = t[ i ];
+                if (func.call(array, t[ i ], i, t)) {
+                    res[ c++ ] = kValue;
                 }
             }
         }
@@ -70,6 +71,6 @@ function filter(func, array) {
     return res;
 }
 
-module.exports = (config) => {
-    return resolveKeyList(config);
+module.exports = (logger, config) => {
+    return resolveKeyList(logger, config);
 }
