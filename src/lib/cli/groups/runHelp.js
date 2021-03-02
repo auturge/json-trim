@@ -3,7 +3,7 @@ const commandLineUsage = require('command-line-usage');
 
 const { flags, commands } = require('../cli-flags');
 const { hasUnknownArgs, allNames, commands: commandNames } = require('../unknown-args');
-const logger = require('../../logging/logger');
+const { Logger } = require('../../logging');
 
 // This function prints a warning about invalid flag
 const printInvalidArgWarning = (args) => {

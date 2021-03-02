@@ -1,4 +1,4 @@
-const logger = require('../../logging/logger');
+const { Logger } = require('../../logging');
 const { defaultCommands } = require('../commands');
 const { isCommandUsed } = require('../arg-utils');
 const { commands, allNames, hasUnknownArgs } = require('../unknown-args');

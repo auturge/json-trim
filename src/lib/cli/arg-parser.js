@@ -1,5 +1,5 @@
 const commander = require('commander');
-const logger = require('../logging/logger');
+const { Logger } = require('../logging');
 const runHelp = require('./groups/runHelp');
 const runVersion = require('./groups/runVersion');
 

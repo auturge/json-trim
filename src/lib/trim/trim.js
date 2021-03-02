@@ -3,8 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const isValid = require("is-valid-path");
 const { exit } = require("process");
-const LogLevel = require("../logging/LogLevel");
-const LogState = require("../logging/LogState");
+const { LogLevel, LogEntryState } = require("../logging");
 
 function validateFileNames(logger, source, target) {
     logger.mark('trim::validateFileNames');
@@ -97,7 +96,7 @@ function trim(logger, source, target, keylist) {
     }
 
     // done!
-    logger.endPartial(LogLevel.ERROR, " done!", LogState.SUCCESS);
+    logger.endPartial(LogLevel.ERROR, " done!", LogEntryState.SUCCESS);
 
     return json;
 }
