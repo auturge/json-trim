@@ -1,6 +1,6 @@
 const path = require("path");
 const DEFAULT_CONFIG = require('./DEFAULT_CONFIG');
-const LogLevel = require("../logging/LogLevel");
+const { LogLevel } = require("../logging");
 const validateConfig = require("./config-validator");
 
 /**

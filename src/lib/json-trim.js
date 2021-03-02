@@ -2,15 +2,14 @@
 
 const generateRuntimeConfiguration = require('./config/config-builder');
 const execute = require('./trim/trim');
-const getLogger = require('./logging/get-logger');
+const { Logger, LoggerOptions } = require('./logging');
 
 class JsonTrim {
 
     logger = null;
 
     constructor(logger) {
-        const loggerSource = 'json-trim';
-        this.logger = logger || getLogger(loggerSource, args, false);
+        this.logger = logger || Logger.getInstance('json-trim', LoggerOptions.DEFAULT);
     }
 
     run(args) {

@@ -8,7 +8,7 @@ const levenshtein = require('fastest-levenshtein');
 const argParser = require('./cli/arg-parser');
 const { flags } = require('./cli/cli-flags');
 const { isCommandUsed } = require('./cli/arg-utils');
-const getLogger = require('./logging/get-logger');
+const { Logger } = require('./logging');
 const JsonTrim = require('./json-trim');
 const EXIT_CODES = require('./errors/EXIT_CODES');
 
@@ -16,7 +16,7 @@ process.title = title;
 
 const runCLI = async (cliArgs) => {
     const parsedArgs = argParser(flags, cliArgs, true, process.title);
-    const logger = getLogger(title, parsedArgs.opts, parsedArgs.isTestMode);
+    const logger = Logger.getInstance(title, parsedArgs.opts);
     logger.mark('runCLI::runCLI');
     logger.debug('Initializing json-trim...');
 

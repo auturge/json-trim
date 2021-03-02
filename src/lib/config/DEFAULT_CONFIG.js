@@ -1,4 +1,4 @@
-const LogLevel = require("../logging/LogLevel");
+const { LogLevel } = require("../logging");
 
 module.exports = {
     source: undefined,
