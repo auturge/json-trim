@@ -3,7 +3,8 @@ const path = require("path");
 const fs = require("fs");
 const isValid = require("is-valid-path");
 const { exit } = require("process");
-const { LogLevel, LogEntryState } = require("../logging");
+const { LogLevel, LogEntryState } = require("../utils/logging");
+const load = require("../utils/json-loader");
 
 function validateFileNames(logger, source, target) {
     logger.mark('trim::validateFileNames');
@@ -67,12 +68,16 @@ function trim(logger, source, target, keylist) {
     // get the source
     logger.debug(` `);
     logger.debug(`    Reading file at '${ sourceFilePath }'.`);
-    let sourceFile = fs.readFileSync(sourceFilePath, 'utf8');
+    let loadResult = load(logger, sourceFilePath);
+    if (loadResult.error) {
+        logger.error(`\nERROR:${ loadResult.error }`);
+        process.exit(1);
+    }
 
-    logger.trace(`   Source File:`, sourceFile);
+    logger.trace(`   Source File:`, loadResult.content);
 
     // create a clone in memory, keeping only the desired parts
-    let clone = JSON.parse(sourceFile);
+    let clone = JSON.parse(JSON.stringify(loadResult.content));
     if (keylist) {
         for (let key in clone) {
             if (Object.prototype.hasOwnProperty.call(clone, key)) {

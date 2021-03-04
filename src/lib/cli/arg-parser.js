@@ -1,5 +1,4 @@
 const commander = require('commander');
-const { Logger } = require('../logging');
 const runHelp = require('./groups/runHelp');
 const runVersion = require('./groups/runVersion');
 
@@ -12,7 +11,7 @@ const runVersion = require('./groups/runVersion');
  * @param {boolean} argsOnly false if all of process.argv has been provided, true if
  * args is only a subset of process.argv that removes the first couple elements
  */
-const argParser = (options, args, argsOnly = false, name = '') => {
+const argParser = (logger, options, args, argsOnly = false, name = '') => {
     const parser = new commander.Command();
 
     // Set parser name
@@ -21,13 +20,13 @@ const argParser = (options, args, argsOnly = false, name = '') => {
 
     // Use customized help output
     if (args.includes('--help') || args.includes('help')) {
-        runHelp(args);
+        runHelp(logger, args);
         process.exit(0);
     }
 
     // Use Customized version info
     if (args.includes('--version') || args.includes('-ver')) {
-        runVersion(args);
+        runVersion(logger, args);
         process.exit(0);
     }
 

@@ -1,13 +1,9 @@
 const util = require('util');
 const { red, cyan, yellow, green, white, magenta } = require('colorette');
 
-// TODO Figure out logging
-// Verbose should show any level
-// default should show success, error, warn, info, log
-// "quiet" should show only error
-
 /** Constructor options that the `Logger` will consider. */
 class LoggerOptions {
+    source = "";
     verbose = false;
     quiet = false;
     silent = false;
@@ -15,16 +11,27 @@ class LoggerOptions {
     static get DEFAULT() {
         return Object.freeze(new LoggerOptions());
     }
+
+    constructor(source) {
+        this.source = source || '';
+    }
 }
 
 /** Defines logging severity levels. */
 class LogLevel {
 
     name = "";
-    index = 0;
+    index = -1;
 
     constructor(name, index) {
-        this.name = Object.freeze((name && name.length) ? name.toUpperCase() : "");
+        if (name == null || !name.length) {
+            throw new Error(`Cannot create a LogLevel with no name.`);
+        }
+        if (index == null) {
+            throw new Error(`Cannot create a LogLevel with no index.`);
+        }
+
+        this.name = Object.freeze(name.toUpperCase());
         this.index = Object.freeze(index);
 
         this.valueOf = function () {
@@ -102,9 +109,25 @@ class LogLevel {
 
 const DEFAULT_LOG_LEVEL = LogLevel.INFO;
 
-function getLogLevel(loggerOptions) {
+function validateOptions(loggerOptions) {
 
-    var logLevel = DEFAULT_LOG_LEVEL;
+    if (loggerOptions && loggerOptions.verbose && loggerOptions.quiet) {
+        throw new Error('Logger cannot be both quiet and verbose.');
+    }
+
+    if (loggerOptions && loggerOptions.verbose && loggerOptions.silent) {
+        throw new Error('Logger cannot be both silent and verbose.');
+    }
+
+    if (loggerOptions && loggerOptions.quiet && loggerOptions.silent) {
+        throw new Error('Logger cannot be both quiet and silent.');
+    }
+}
+
+function getLogLevel(loggerOptions, defaultLogLevel = DEFAULT_LOG_LEVEL) {
+    validateOptions(loggerOptions);
+
+    var logLevel = defaultLogLevel;
 
     if (loggerOptions != null) {
         if (loggerOptions.quiet) {
@@ -131,7 +154,14 @@ class LogEntryState {
     color = white;
 
     constructor(name, index, colorFunc) {
-        this.name = Object.freeze((name && name.length) ? name.toUpperCase() : "");
+        if (name == null || !name.length) {
+            throw new Error(`Cannot create a LogEntryState with no name.`);
+        }
+        if (index == null) {
+            throw new Error(`Cannot create a LogEntryState with no index.`);
+        }
+
+        this.name = Object.freeze(name.toUpperCase());
         this.index = Object.freeze(index);
         this.color = Object.freeze(colorFunc);
 
@@ -163,8 +193,8 @@ class LogEntryState {
 /** A class used to perform simple console logging. */
 class Logger {
 
-    /** Is the logger configured to be silent? */
-    isSilent = false;
+    /** Should the logger output anything at all? */
+    enabled = true;
 
     /** Is the logger waiting to complete a line of text? */
     isPartialOpen = false;
@@ -173,16 +203,19 @@ class Logger {
     logLevel = DEFAULT_LOG_LEVEL;
 
     static getInstance(source, options) {
-        source = source || '';
-        options = options || new LoggerOptions();
-
-        const logLevel = getLogLevel(options);
-        const logger = new Logger();
-        logger.configure(source, logLevel);
-        return logger;
+        options = options || new LoggerOptions(source);
+        return new Logger(options);
     }
 
-    enabled = true;
+    constructor(options) {
+        if (!options) {
+            return;
+        }
+        const logLevel = getLogLevel(options);
+        this.source = options.source || '';
+        this.setLevel(logLevel);
+    }
+
 
     /** Disables/silences the logger. */
     disable() {
@@ -196,24 +229,38 @@ class Logger {
         return this;
     }
 
-    /** (Re-)configures the `source` and `logLevel` properties. */
-    configure = (source, loglevel) => {
-        this.source = source || '';
-        this.logLevel = loglevel || this.logLevel;
+    /** Sets the log level. */
+    setLevel(logLevel) {
+        if (!logLevel) {
+            throw new Error(`Argument [logLevel] must not be null or undefined.`);
+        }
+        this.logLevel = logLevel;
         this.enabled = (this.logLevel != LogLevel.SILENT);
         return this;
     }
 
     /** Checks if the logger can/should display output at the given level. */
     canOutputAtLevel(logLevel) {
-        return (this.logLevel >= logLevel && !this.isSilent);
+        return (this.logLevel >= logLevel && this.enabled);
+    }
+
+    /** Formats and writes a fatal log message.
+     *
+     * This is best applied when one or more key business functionalities are not working
+     * and the whole system doesn’t fulfill the business functionalities.
+    */
+    fatal(...val) {
+        if (this.canOutputAtLevel(LogLevel.FATAL)) {
+            console.error(`[${ this.source }] ${ red(util.format(...val)) }`);
+            this.isPartialOpen = false;
+        }
     }
 
     /** Formats and writes an error log message.
      *
      * This is best applied when one or more functionalities are not working, preventing some functionalities from working correctly.
     */
-    error = (...val) => {
+    error(...val) {
         if (this.canOutputAtLevel(LogLevel.ERROR)) {
             console.error(`[${ this.source }] ${ red(util.format(...val)) }`);
             this.isPartialOpen = false;
@@ -223,7 +270,7 @@ class Logger {
     /** Formats and writes a warning log message.
      *
      * This is best applied when unexpected behavior happened inside the application, but it is continuing its work and the key business features are operating as expected. */
-    warn = (...val) => {
+    warn(...val) {
         if (this.canOutputAtLevel(LogLevel.WARN)) {
             console.warn(`[${ this.source }] ${ yellow(util.format(...val)) }`);
             this.isPartialOpen = false;
@@ -234,7 +281,7 @@ class Logger {
      *
      * This is best applied when an event happened, the event is purely informative and can be ignored during normal operations.
     */
-    info = (...val) => {
+    info(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
             console.info(`[${ this.source }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
@@ -245,7 +292,7 @@ class Logger {
      *
      * This is best used for events considered to be useful during software debugging when more granular information is needed.
     */
-    debug = (...val) => {
+    debug(...val) {
         if (this.canOutputAtLevel(LogLevel.DEBUG)) {
             console.info(`[${ this.source }] ${ cyan(util.format(...val)) }`);
             this.isPartialOpen = false;
@@ -256,16 +303,15 @@ class Logger {
      *
      * This is best used to describe events showing step by step execution of your code that can be ignored during the standard operation, but may be useful during extended debugging sessions.
     */
-    trace = (...val) => {
+    trace(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
-            console.info(`[${ this.source }]  ${ white(util.format(...val)) }`);
+            console.info(`[${ this.source }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
 
-
     /** Formats and writes the first portion of a message, using the given state. */
-    beginPartial = (minLevel, text, state = LogEntryState.NONE) => {
+    beginPartial(minLevel, text, state = LogEntryState.NONE) {
         if (this.canOutputAtLevel(minLevel)) {
             process.stdout.write(`[${ this.source }] ${ state.color(text) }`);
             this.isPartialOpen = true;
@@ -273,29 +319,32 @@ class Logger {
     }
 
     /** Formats and writes the last portion of a message, on the same line as the first portion, using the given state. */
-    endPartial = (minLevel, text, state) => {
+    endPartial(minLevel, text, state = LogEntryState.NONE) {
         if (!this.canOutputAtLevel(minLevel))
             return;
 
-        if (!this.isPartialOpen) {
-            console.info(`[${ this.source }]  ${ state.color(text) }\n`);
-            this.isPartialOpen = false;
-            return;
+        var message;
+        if (text && text.length) {
+            message = `${ state.color(text) }\n`;
+        } else {
+            message = `\n`;
         }
 
-        if (text && text.length) {
-            state = state || LogEntryState.NONE;
-            process.stdout.write(`${ state.color(text) }\n`);
-        } else {
-            process.stdout.write(`\n`);
+        var method;
+        if (!this.isPartialOpen) {
+            console.info(message);
         }
+        else {
+            process.stdout.write(message);
+        }
+        this.isPartialOpen = false;
     }
 
     /** Formats and writes a trace log marker.
      *
      * This is best used to highlight specific operations or points in the code, which may be useful during extended debugging sessions.
     */
-    mark = (...val) => {
+    mark(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
             console.info(`[${ this.source }] ${ magenta(util.format(...val)) }`);
             this.isPartialOpen = false;
@@ -306,9 +355,9 @@ class Logger {
      *
      * This is best used to highlight a successful operation.
     */
-    success = (...val) => {
+    success(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
-            console.log(`[${ this.source }] ${ green(util.format(...val)) }`);
+            console.info(`[${ this.source }] ${ green(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -317,13 +366,13 @@ class Logger {
      *
      * This is best applied when an event happened, the event is purely informative and can be ignored during normal operations.
     */
-    log = (...val) => { this.raw(...val); }
+    log(...val) { this.raw(...val); }
 
     /** Writes an informational log message without formatting.
      *
      * This is best applied when an event happened, the event is purely informative and can be ignored during normal operations.
     */
-    raw = (...val) => {
+    raw(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
             console.log(...val);
             this.isPartialOpen = false;
@@ -336,4 +385,6 @@ module.exports = {
     Logger: Logger,
     LoggerOptions: LoggerOptions,
     LogLevel: LogLevel,
+    getLogLevel: getLogLevel,
+    DEFAULT_LOG_LEVEL: DEFAULT_LOG_LEVEL
 }

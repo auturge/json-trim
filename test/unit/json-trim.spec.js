@@ -1,22 +1,13 @@
-const sinon = require("sinon");
-const { unwrap } = require("../objects/helpers.js");
 const { assert } = require('chai');
 const { JsonTrim } = require("../../src/index.js");
-const TestLogger = require("../objects/test.logger");
 
 describe('JsonTrim', () => {
 
-    var logger = new TestLogger().disable();
     var trimmer;
-    let mark;
 
     beforeEach(() => {
-        mark = sinon.stub(logger, "mark");
-        trimmer = new JsonTrim(logger);
-    });
-
-    afterEach(() => {
-        unwrap(logger.mark);
+        trimmer = new JsonTrim();
+        trimmer.logger.disable();
     });
 
     it('ctor - creates a new logger, if one is not provided', () => {
@@ -50,6 +41,9 @@ describe('JsonTrim', () => {
     })
 
     it('run - does not throw an error when the config object is proper', () => {
+        // trimmer.logger.enable();
+        // trimmer.logger.logLevel = LogLevel.TRACE;
+
         const opts = {
             'source': "./test/objects/test.package.json"
         };

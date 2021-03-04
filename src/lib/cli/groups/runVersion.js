@@ -1,9 +1,9 @@
-const { Logger } = require('../../logging');
+// const { Logger } = require('../../utils/logging');
 const { defaultCommands } = require('../commands');
 const { isCommandUsed } = require('../arg-utils');
 const { commands, allNames, hasUnknownArgs } = require('../unknown-args');
 
-const outputVersion = (args) => {
+const outputVersion = (logger, args) => {
     // This is used to throw err when there are multiple command along with version
     const commandsUsed = args.filter((val) => commands.includes(val));
 

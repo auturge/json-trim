@@ -1,11 +1,9 @@
-const { Logger, LogLevel } = require("../../src/lib/logging");
+const { Logger } = require("../../src/lib/utils/logging");
 
 class TestLogger extends Logger {
     constructor() {
-        super();
+        super({ silent: true });
         this.source = "Unit Test";
-        this.logLevel = LogLevel.SILENT;
-        this.isSilent = true;
     }
 }
 
