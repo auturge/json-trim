@@ -1,5 +1,5 @@
 const sinon = require('sinon');
-const { assert } = require('chai');
+const { assert, expect } = require('chai');
 const { unwrap } = require("../../objects/helpers");
 const util = require('util');
 const { AnyRandom } = require('@auturge/testing');
@@ -33,11 +33,11 @@ describe('logging', () => {
                 { key: 'verbose', options: { quiet: false, silent: false, verbose: true } },
             ].forEach(({ key, options }) => {
                 it(`ctor - creates a new logger, using the specified options [${ key }]`, () => {
-                    options.source = AnyRandom.string(5, 10);
+                    options.name = AnyRandom.string(5, 10);
 
                     logger = new Logger(options);
 
-                    assert.equal(logger.source, options.source);
+                    assert.equal(logger.name, options.name);
 
                     if (options.silent) {
                         assert.isFalse(logger.enabled);
@@ -82,7 +82,7 @@ describe('logging', () => {
 
                 logger = new Logger(options);
 
-                assert.equal(logger.source, "");
+                assert.equal(logger.name, "");
             });
         });
 
@@ -113,6 +113,26 @@ describe('logging', () => {
                 assert.isTrue(logger.enabled, ".enable() failed to enable the logger.");
                 assert.isNotNull(result, ".enable() failed to return a value.");
                 assert.equal(result, logger, ".enable() failed to return the correct value.");
+            });
+        });
+
+        describe('setOptions', () => {
+            beforeEach(() => {
+                logger = new Logger();
+            });
+
+            [
+                { level: LogLevel.SILENT, options: { silent: true } },
+                { level: LogLevel.ERROR, options: { quiet: true } },
+                { level: LogLevel.INFO, options: {} },
+                { level: LogLevel.DEBUG, options: { debug: true } },
+                { level: LogLevel.TRACE, options: { verbose: true } }
+            ].forEach(({ level, options }) => {
+                it(`setOptions - given the right options, sets the loglevel to ${ level }`, () => {
+                    logger.setOptions(options);
+
+                    assert.equal(logger.logLevel, level);
+                })
             });
         });
 
@@ -222,7 +242,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "error");
                 message = AnyRandom.string(5, 10);
@@ -246,7 +266,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -256,7 +276,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -266,7 +286,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -276,7 +296,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -286,7 +306,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -296,7 +316,7 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -305,7 +325,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "error");
                 message = AnyRandom.string(5, 10);
@@ -337,7 +357,7 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -347,7 +367,7 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -357,7 +377,7 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -367,7 +387,7 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -377,7 +397,7 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ red(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -386,7 +406,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "warn");
                 message = AnyRandom.string(5, 10);
@@ -426,7 +446,7 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -436,7 +456,7 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -446,7 +466,7 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -456,7 +476,7 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -465,7 +485,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "info");
                 message = AnyRandom.string(5, 10);
@@ -513,7 +533,7 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ white(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -523,7 +543,7 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ white(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -533,7 +553,7 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ white(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -542,7 +562,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "info");
                 message = AnyRandom.string(5, 10);
@@ -599,7 +619,7 @@ describe('logging', () => {
 
                 logger.debug(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ cyan(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ cyan(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -609,7 +629,7 @@ describe('logging', () => {
 
                 logger.debug(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ cyan(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ cyan(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -618,7 +638,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "info");
                 message = AnyRandom.string(5, 10);
@@ -683,7 +703,7 @@ describe('logging', () => {
 
                 logger.trace(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ white(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -692,7 +712,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "info");
                 message = AnyRandom.string(5, 10);
@@ -757,7 +777,7 @@ describe('logging', () => {
 
                 logger.mark(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ magenta(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ magenta(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -766,7 +786,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "info");
                 message = AnyRandom.string(5, 10);
@@ -814,7 +834,7 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ green(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -824,7 +844,7 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ green(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -834,7 +854,7 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ green(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -843,7 +863,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "log");
                 message = AnyRandom.string(5, 10);
@@ -920,7 +940,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(console, "log");
                 message = AnyRandom.string(5, 10);
@@ -998,7 +1018,7 @@ describe('logging', () => {
             var consoleStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 consoleStub = sinon.stub(process.stdout, "write");
                 message = AnyRandom.string(5, 10);
@@ -1008,13 +1028,13 @@ describe('logging', () => {
                 unwrap(process.stdout.write);
             });
 
-            it(`beginPartial - given a level and some text, outputs it using process.stdout.write, in white, and sets isPartialOpen to true`, () => {
+            it(`beginPartial - given a level and some text, outputs it using process.stdout.write, in the same color as the level, and sets isPartialOpen to true`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = false;
 
                 logger.beginPartial(LogLevel.DEBUG, message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.source }] ${ white(util.format(message)) }`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ LogLevel.DEBUG.color(message) }`);
                 assert.isTrue(logger.isPartialOpen);
             });
         });
@@ -1024,7 +1044,7 @@ describe('logging', () => {
             var consoleStub, processStub, message;
             beforeEach(() => {
                 logger = new Logger();
-                logger.source = AnyRandom.string(5, 10);
+                logger.name = AnyRandom.string(5, 10);
                 logger.enabled = true;
                 processStub = sinon.stub(process.stdout, "write");
                 consoleStub = sinon.stub(console, "info");
@@ -1036,17 +1056,17 @@ describe('logging', () => {
                 unwrap(console.info);
             })
 
-            it(`endPartial - given a level and some text, outputs it using process.stdout.write, in white, and sets isPartialOpen to false`, () => {
+            it(`endPartial - given a level and some text, outputs it using process.stdout.write, in the color of the level, and sets isPartialOpen to false`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = true;
 
                 logger.endPartial(LogLevel.DEBUG, message);
 
-                sinon.assert.calledOnceWithExactly(processStub, `${ white(util.format(message)) }\n`);
+                sinon.assert.calledOnceWithExactly(processStub, `${ LogLevel.DEBUG.color(message) }\n`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
-            it(`endPartial - given a level, outputs it using process.stdout.write, in white, and sets isPartialOpen to false`, () => {
+            it(`endPartial - given a level, outputs it using process.stdout.write, and sets isPartialOpen to false`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = true;
 
@@ -1056,17 +1076,17 @@ describe('logging', () => {
                 assert.isFalse(logger.isPartialOpen);
             });
 
-            it(`endPartial - if partial isn't open, just passes it to info, in white, and sets isPartialOpen to false`, () => {
+            it(`endPartial - if partial isn't open, pass it to info with the header, and sets isPartialOpen to false`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = false;
 
                 logger.endPartial(LogLevel.DEBUG, message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `${ white(util.format(message)) }\n`);
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ LogLevel.DEBUG.color(message) }\n`);
                 assert.isFalse(logger.isPartialOpen);
             });
 
-            it(`endPartial - given no message, if partial isn't open, just passes it to info, in white, and sets isPartialOpen to false`, () => {
+            it(`endPartial - given no message, if partial isn't open, pass it to info, and sets isPartialOpen to false`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = false;
 
@@ -1084,19 +1104,32 @@ describe('logging', () => {
             it('ctor - given no name, throws an error', () => {
                 var name;
                 const index = AnyRandom.int();
+                const color = AnyRandom.oneOf([ red, cyan, yellow, green, white, magenta ]);
+
 
                 assert.throws(() => {
-                    new LogEntryState(name, index);
+                    new LogEntryState(name, index, color);
                 }, "Cannot create a LogEntryState with no name.");
             });
 
             it('ctor - given no index, throws an error', () => {
                 const name = AnyRandom.string(5, 10);
                 var index;
+                const color = AnyRandom.oneOf([ red, cyan, yellow, green, white, magenta ]);
 
                 assert.throws(() => {
-                    new LogEntryState(name, index);
+                    new LogEntryState(name, index, color);
                 }, "Cannot create a LogEntryState with no index.");
+            });
+
+            it('ctor - given no color function, throws an error', () => {
+                const name = AnyRandom.string(5, 10);
+                var index = AnyRandom.int();
+                var color;
+
+                assert.throws(() => {
+                    new LogEntryState(name, index, color);
+                }, "Cannot create a LogEntryState with no color function.");
             });
         });
 
@@ -1133,43 +1166,53 @@ describe('logging', () => {
             it('ctor - given no name, throws an error', () => {
                 var name;
                 const index = AnyRandom.int();
+                const colors = [ red, cyan, yellow, green, white, magenta ];
+                const color = colors[ Math.floor(colors.length * Math.random()) ];
 
                 assert.throws(() => {
-                    new LogLevel(name, index);
+                    new LogLevel(name, index, color);
                 }, "Cannot create a LogLevel with no name.");
             });
 
             it('ctor - given no index, throws an error', () => {
                 const name = AnyRandom.string(5, 10);
                 var index;
+                const colors = [ red, cyan, yellow, green, white, magenta ];
+                const color = colors[ Math.floor(colors.length * Math.random()) ];
 
                 assert.throws(() => {
-                    new LogLevel(name, index);
+                    new LogLevel(name, index, color);
                 }, "Cannot create a LogLevel with no index.");
+            });
+
+            it('ctor - given no color function, throws an error', () => {
+                const name = AnyRandom.string(5, 10);
+                var index = AnyRandom.int();
+                var color;
+
+                assert.throws(() => {
+                    new LogLevel(name, index, color);
+                }, "Cannot create a LogLevel with no color function.");
             });
         });
 
         describe('toString', () => {
             it('toString - returns the uppercased name of the log level', () => {
-                const name = AnyRandom.string(5, 10);
-                const index = AnyRandom.int();
-                const level = new LogLevel(name, index);
+                const level = LogLevel.list[ Math.floor(LogLevel.list.length * Math.random()) ];
 
                 const result = level.toString();
 
-                assert.equal(result, name.toUpperCase());
+                assert.equal(result, level.name.toUpperCase());
             });
         });
 
         describe('valueOf', () => {
-            it('valueOf - returns the name of the log level', () => {
-                const name = AnyRandom.string(5, 10);
-                const index = AnyRandom.int();
-                const level = new LogLevel(name, index);
+            it('valueOf - returns the index of the log level', () => {
+                const level = AnyRandom.oneOf(LogLevel.list);
 
                 const result = level.valueOf();
 
-                assert.equal(result, index);
+                assert.equal(result, level.index);
             });
         });
 
@@ -1242,7 +1285,7 @@ describe('logging', () => {
 
                 const actual = LoggerOptions.DEFAULT;
 
-                assert.equal(actual.source, "");
+                assert.equal(actual.name, "");
                 assert.equal(actual.verbose, false);
                 assert.equal(actual.quiet, false);
                 assert.equal(actual.silent, false);
@@ -1252,11 +1295,11 @@ describe('logging', () => {
         describe('ctor', () => {
             it('ctor - given a source, sets the property', () => {
                 const name = AnyRandom.string(5, 10);
-                const expected = { source: name, verbose: false, quiet: false, silent: false };
+                const expected = { name: name, verbose: false, quiet: false, silent: false };
 
-                const result = new LoggerOptions(name);
+                const result = new LoggerOptions(expected);
 
-                assert.equal(result.source, name);
+                assert.equal(result.name, name);
             });
         });
     });
@@ -1264,10 +1307,14 @@ describe('logging', () => {
     describe('getLogLevel', () => {
 
         [
-            { options: { verbose: false, quiet: false, silent: false }, level: LogLevel.INFO }
+            { options: { debug: false, verbose: false, quiet: false, silent: false }, level: LogLevel.INFO },
+            { options: { debug: true, verbose: false, quiet: false, silent: false }, level: LogLevel.DEBUG },
+            { options: { debug: false, verbose: true, quiet: false, silent: false }, level: LogLevel.TRACE },
+            { options: { debug: false, verbose: false, quiet: true, silent: false }, level: LogLevel.ERROR },
+            { options: { debug: false, verbose: false, quiet: false, silent: true }, level: LogLevel.SILENT }
         ].forEach(({ options, level }) => {
             it(`getLogLevel - returns the expected level (${ level })`, () => {
-                options.source = AnyRandom.string(5, 10);
+                options.name = AnyRandom.string(5, 10);
 
                 const result = getLogLevel(options);
 

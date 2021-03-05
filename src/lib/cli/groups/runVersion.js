@@ -3,7 +3,9 @@ const { defaultCommands } = require('../commands');
 const { isCommandUsed } = require('../arg-utils');
 const { commands, allNames, hasUnknownArgs } = require('../unknown-args');
 
-const outputVersion = (logger, args) => {
+const logger = require('../../utils/logging').getSingleton('json-trim');
+
+const outputVersion = (args) => {
     // This is used to throw err when there are multiple command along with version
     const commandsUsed = args.filter((val) => commands.includes(val));
 

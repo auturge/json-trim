@@ -1,6 +1,9 @@
 const commander = require('commander');
+const { Logger } = require('../utils/logging');
 const runHelp = require('./groups/runHelp');
 const runVersion = require('./groups/runVersion');
+
+const logger = require('../utils/logging').getSingleton('json-trim');
 
 /**
  *  Creates Argument parser corresponding to the supplied options
@@ -11,7 +14,7 @@ const runVersion = require('./groups/runVersion');
  * @param {boolean} argsOnly false if all of process.argv has been provided, true if
  * args is only a subset of process.argv that removes the first couple elements
  */
-const argParser = (logger, options, args, argsOnly = false, name = '') => {
+const argParser = (options, args, argsOnly = false, name = '') => {
     const parser = new commander.Command();
 
     // Set parser name
@@ -20,13 +23,13 @@ const argParser = (logger, options, args, argsOnly = false, name = '') => {
 
     // Use customized help output
     if (args.includes('--help') || args.includes('help')) {
-        runHelp(logger, args);
+        runHelp(args);
         process.exit(0);
     }
 
     // Use Customized version info
     if (args.includes('--version') || args.includes('-ver')) {
-        runVersion(logger, args);
+        runVersion(args);
         process.exit(0);
     }
 

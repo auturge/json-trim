@@ -4,8 +4,10 @@ const commandLineUsage = require('command-line-usage');
 const { flags, commands } = require('../cli-flags');
 const { hasUnknownArgs, allNames, commands: commandNames } = require('../unknown-args');
 
+const logger = require('../../utils/logging').getSingleton('json-trim');
+
 // This function prints a warning about invalid flag
-const printInvalidArgWarning = (logger, args) => {
+const printInvalidArgWarning = (args) => {
     const invalidArgs = hasUnknownArgs(args, allNames);
     if (invalidArgs.length > 0) {
         const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
@@ -14,7 +16,7 @@ const printInvalidArgWarning = (logger, args) => {
 };
 
 // This function is responsible for printing command/flag scoped help
-const printSubHelp = (logger, subject, isCommand) => {
+const printSubHelp = (subject, isCommand) => {
     const info = isCommand ? commands : flags;
     // Contains object with details about given subject
     const options = info.find((commandOrFlag) => {
@@ -107,9 +109,9 @@ const printHelp = () => {
     return commandLineUsage(usageOpts);
 };
 
-const outputHelp = (logger, cliArgs) => {
+const outputHelp = (cliArgs) => {
     options.enabled = !cliArgs.includes('--no-color');
-    printInvalidArgWarning(logger, cliArgs);
+    printInvalidArgWarning(cliArgs);
     const flagOrCommandUsed = allNames.filter((name) => {
         return cliArgs.includes(name);
     })[ 0 ];
@@ -117,7 +119,7 @@ const outputHelp = (logger, cliArgs) => {
 
     // Print full help when no flag or command is supplied with help
     if (flagOrCommandUsed) {
-        printSubHelp(logger, flagOrCommandUsed, isCommand);
+        printSubHelp(flagOrCommandUsed, isCommand);
     } else {
         logger.raw(printHelp());
     }

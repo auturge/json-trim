@@ -1,31 +1,28 @@
 const { assert } = require('chai');
 const { JsonTrim } = require("../../src/index.js");
 
-describe('JsonTrim', () => {
+const { LogLevel } = require('../../src/lib/utils/logging.js');
+const logger = require('../../src/lib/utils/logging').getSingleton('unit-test');
+
+describe('json-trim', () => {
 
     var trimmer;
 
     beforeEach(() => {
         trimmer = new JsonTrim();
-        trimmer.logger.disable();
+        logger.disable();
     });
-
-    it('ctor - creates a new logger, if one is not provided', () => {
-        trimmer = new JsonTrim();
-
-        // the new logger won't be disabled
-        // (as it would be if it came from the beforeEach)
-        assert.isTrue(trimmer.logger.enabled);
-    })
 
     it('run - throws an error when the config object is not specified', () => {
         assert.throws(() => {
             trimmer.run();
-        }, `Could not resolve configuration: 'source' is not defined`);
+        }, `Could not resolve configuration: 'source' is not defined.`);
     })
 
     it('run - throws an error when the config object does not specify a source file', () => {
-        const opts = { 'destination': "your mom's couch" };
+
+        const opts = { 'destination': "./test/objects/test.output.json" };
+
         assert.throws(() => {
             trimmer.run(opts);
         }, `Could not resolve configuration: 'source' is not defined.`);
@@ -41,8 +38,7 @@ describe('JsonTrim', () => {
     })
 
     it('run - does not throw an error when the config object is proper', () => {
-        // trimmer.logger.enable();
-        // trimmer.logger.logLevel = LogLevel.TRACE;
+        // logger.setLevel(LogLevel.DEBUG);
 
         const opts = {
             'source': "./test/objects/test.package.json"

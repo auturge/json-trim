@@ -9,13 +9,14 @@ const argParser = require('./cli/arg-parser');
 const { flags } = require('./cli/cli-flags');
 const { isCommandUsed } = require('./cli/arg-utils');
 const JsonTrim = require('./json-trim');
-const EXIT_CODES = require('./errors/EXIT_CODES');
+const { EXIT_CODES } = require('./utils/errors');
+const logger = require('./utils/logging').getSingleton('json-trim');
 
 process.title = title;
 
-const runCLI = async (logger, cliArgs) => {
-    const parsedArgs = argParser(logger, flags, cliArgs, true, process.title);
-    logger.setLevel(parsedArgs.opts);
+const runCLI = async (cliArgs) => {
+    const parsedArgs = argParser(flags, cliArgs, true, process.title);
+    logger.setOptions(parsedArgs.opts);
 
     logger.mark('runCLI::runCLI');
     logger.debug('Initializing json-trim...');
@@ -31,7 +32,7 @@ const runCLI = async (logger, cliArgs) => {
     }
 
     try {
-        const trim = new JsonTrim(logger);
+        const trim = new JsonTrim();
 
         // handle unknown args
         if (parsedArgs.unknownArgs.length > 0) {

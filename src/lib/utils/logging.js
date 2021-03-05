@@ -3,17 +3,24 @@ const { red, cyan, yellow, green, white, magenta } = require('colorette');
 
 /** Constructor options that the `Logger` will consider. */
 class LoggerOptions {
-    source = "";
-    verbose = false;
+    name = "";
+
+    debug = false;
     quiet = false;
     silent = false;
+    verbose = false;
 
     static get DEFAULT() {
         return Object.freeze(new LoggerOptions());
     }
 
-    constructor(source) {
-        this.source = source || '';
+    constructor(opts) {
+        if (!opts) return;
+        if (opts.name) { this.name = opts.name; }
+        if (opts.debug) { this.debug = true; }
+        if (opts.quiet) { this.quiet = true; }
+        if (opts.silent) { this.silent = true; }
+        if (opts.verbose) { this.verbose = true; }
     }
 }
 
@@ -22,17 +29,22 @@ class LogLevel {
 
     name = "";
     index = -1;
+    color = white;
 
-    constructor(name, index) {
+    constructor(name, index, colorFunc) {
         if (name == null || !name.length) {
             throw new Error(`Cannot create a LogLevel with no name.`);
         }
         if (index == null) {
             throw new Error(`Cannot create a LogLevel with no index.`);
         }
+        if (colorFunc == null) {
+            throw new Error(`Cannot create a LogLevel with no color function.`);
+        }
 
         this.name = Object.freeze(name.toUpperCase());
         this.index = Object.freeze(index);
+        this.color = Object.freeze((...val) => util.format(colorFunc(...val)));
 
         this.valueOf = function () {
             return this.index;
@@ -44,25 +56,25 @@ class LogLevel {
     }
 
     /** A log level used in the rare event that all output should be suppressed, as in unit testing. */
-    static SILENT = Object.freeze(new LogLevel("SILENT", 0));
+    static SILENT = Object.freeze(new LogLevel("SILENT", 0, white));
 
     /** A log level used when one or more key business functionalities are not working and the whole system doesn’t fulfill the business functionalities. */
-    static FATAL = Object.freeze(new LogLevel("FATAL", 1));
+    static FATAL = Object.freeze(new LogLevel("FATAL", 1, red));
 
     /** A log level used when one or more functionalities are not working, preventing some functionalities from working correctly. */
-    static ERROR = Object.freeze(new LogLevel("ERROR", 2));
+    static ERROR = Object.freeze(new LogLevel("ERROR", 2, red));
 
     /** A log level used when unexpected behavior happened inside the application, but it is continuing its work and the key business features are operating as expected. */
-    static WARN = Object.freeze(new LogLevel("WARN", 3));
+    static WARN = Object.freeze(new LogLevel("WARN", 3, yellow));
 
     /** A log level used when an event happened, the event is purely informative and can be ignored during normal operations. */
-    static INFO = Object.freeze(new LogLevel("INFO", 4));
+    static INFO = Object.freeze(new LogLevel("INFO", 4, white));
 
     /** A log level used for events considered to be useful during software debugging when more granular information is needed. */
-    static DEBUG = Object.freeze(new LogLevel("DEBUG", 5));
+    static DEBUG = Object.freeze(new LogLevel("DEBUG", 5, cyan));
 
     /** A log level describing events showing step by step execution of your code that can be ignored during the standard operation, but may be useful during extended debugging sessions. */
-    static TRACE = Object.freeze(new LogLevel("TRACE", 6));
+    static TRACE = Object.freeze(new LogLevel("TRACE", 6, white));
 
     static list = Object.freeze([ LogLevel.SILENT, LogLevel.FATAL, LogLevel.ERROR, LogLevel.WARN, LogLevel.INFO, LogLevel.DEBUG, LogLevel.TRACE ]);
 
@@ -109,7 +121,7 @@ class LogLevel {
 
 const DEFAULT_LOG_LEVEL = LogLevel.INFO;
 
-function validateOptions(loggerOptions) {
+function validateLogLevelOptions(loggerOptions) {
 
     if (loggerOptions && loggerOptions.verbose && loggerOptions.quiet) {
         throw new Error('Logger cannot be both quiet and verbose.');
@@ -125,13 +137,16 @@ function validateOptions(loggerOptions) {
 }
 
 function getLogLevel(loggerOptions, defaultLogLevel = DEFAULT_LOG_LEVEL) {
-    validateOptions(loggerOptions);
+    validateLogLevelOptions(loggerOptions);
 
     var logLevel = defaultLogLevel;
 
     if (loggerOptions != null) {
         if (loggerOptions.quiet) {
             logLevel = LogLevel.ERROR;
+        }
+        else if (loggerOptions.debug) {
+            logLevel = LogLevel.DEBUG;
         }
         else if (loggerOptions.verbose) {
             logLevel = LogLevel.TRACE;
@@ -160,10 +175,13 @@ class LogEntryState {
         if (index == null) {
             throw new Error(`Cannot create a LogEntryState with no index.`);
         }
+        if (colorFunc == null) {
+            throw new Error(`Cannot create a LogEntryState with no color function.`);
+        }
 
         this.name = Object.freeze(name.toUpperCase());
         this.index = Object.freeze(index);
-        this.color = Object.freeze(colorFunc);
+        this.color = Object.freeze((...val) => util.format(colorFunc(...val)));
 
         this.valueOf = function () {
             return this.index;
@@ -175,19 +193,19 @@ class LogEntryState {
     }
 
     /** A log state used when no state is declared. */
-    static NONE = Object.freeze(new LogEntryState("NONE", -1, (...val) => util.format(white(...val))));
+    static NONE = Object.freeze(new LogEntryState("NONE", -1, white));
 
     /** A log state that describes a successful operation. */
-    static SUCCESS = Object.freeze(new LogEntryState("SUCCESS", 0, (...val) => util.format(green(...val))));
+    static SUCCESS = Object.freeze(new LogEntryState("SUCCESS", 0, green));
 
     /** A log state used when something has failed. Not necessarily an error. */
-    static FAILURE = Object.freeze(new LogEntryState("FAILURE", 2, (...val) => util.format(red(...val))));
+    static FAILURE = Object.freeze(new LogEntryState("FAILURE", 2, red));
 
     /** A log state used when unexpected behavior happened inside the application, but it is continuing its work and the key business features are operating as expected. */
-    static WARN = Object.freeze(new LogEntryState("WARN", 1, (...val) => util.format(yellow(...val))));
+    static WARN = Object.freeze(new LogEntryState("WARN", 1, yellow));
 
     /** A log state used when one or more functionalities are not working, preventing some functionalities from working correctly. */
-    static ERROR = Object.freeze(new LogEntryState("ERROR", 3, (...val) => util.format(red(...val))));
+    static ERROR = Object.freeze(new LogEntryState("ERROR", 3, red));
 }
 
 /** A class used to perform simple console logging. */
@@ -202,9 +220,18 @@ class Logger {
     /** The log level */
     logLevel = DEFAULT_LOG_LEVEL;
 
-    static getInstance(source, options) {
-        options = options || new LoggerOptions(source);
+    static getInstance(name, options) {
+        options = options || new LoggerOptions();
+        options.name = name;
         return new Logger(options);
+    }
+
+    static _singleton = null;
+    static getSingleton(name, options = new LoggerOptions()) {
+        if (!Logger._singleton) {
+            Logger._singleton = this.getInstance(name, options);
+        }
+        return Logger._singleton;
     }
 
     constructor(options) {
@@ -212,10 +239,9 @@ class Logger {
             return;
         }
         const logLevel = getLogLevel(options);
-        this.source = options.source || '';
+        this.name = options.name || '';
         this.setLevel(logLevel);
     }
-
 
     /** Disables/silences the logger. */
     disable() {
@@ -239,6 +265,12 @@ class Logger {
         return this;
     }
 
+    /** Sets the log level using `LoggerOptions`. */
+    setOptions(options) {
+        const opts = new LoggerOptions(options);
+        this.logLevel = getLogLevel(opts);
+    }
+
     /** Checks if the logger can/should display output at the given level. */
     canOutputAtLevel(logLevel) {
         return (this.logLevel >= logLevel && this.enabled);
@@ -251,7 +283,7 @@ class Logger {
     */
     fatal(...val) {
         if (this.canOutputAtLevel(LogLevel.FATAL)) {
-            console.error(`[${ this.source }] ${ red(util.format(...val)) }`);
+            console.error(`[${ this.name }] ${ red(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -262,7 +294,7 @@ class Logger {
     */
     error(...val) {
         if (this.canOutputAtLevel(LogLevel.ERROR)) {
-            console.error(`[${ this.source }] ${ red(util.format(...val)) }`);
+            console.error(`[${ this.name }] ${ red(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -272,7 +304,7 @@ class Logger {
      * This is best applied when unexpected behavior happened inside the application, but it is continuing its work and the key business features are operating as expected. */
     warn(...val) {
         if (this.canOutputAtLevel(LogLevel.WARN)) {
-            console.warn(`[${ this.source }] ${ yellow(util.format(...val)) }`);
+            console.warn(`[${ this.name }] ${ yellow(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -283,7 +315,7 @@ class Logger {
     */
     info(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
-            console.info(`[${ this.source }] ${ white(util.format(...val)) }`);
+            console.info(`[${ this.name }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -294,7 +326,7 @@ class Logger {
     */
     debug(...val) {
         if (this.canOutputAtLevel(LogLevel.DEBUG)) {
-            console.info(`[${ this.source }] ${ cyan(util.format(...val)) }`);
+            console.info(`[${ this.name }] ${ cyan(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -305,39 +337,9 @@ class Logger {
     */
     trace(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
-            console.info(`[${ this.source }] ${ white(util.format(...val)) }`);
+            console.info(`[${ this.name }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
-    }
-
-    /** Formats and writes the first portion of a message, using the given state. */
-    beginPartial(minLevel, text, state = LogEntryState.NONE) {
-        if (this.canOutputAtLevel(minLevel)) {
-            process.stdout.write(`[${ this.source }] ${ state.color(text) }`);
-            this.isPartialOpen = true;
-        }
-    }
-
-    /** Formats and writes the last portion of a message, on the same line as the first portion, using the given state. */
-    endPartial(minLevel, text, state = LogEntryState.NONE) {
-        if (!this.canOutputAtLevel(minLevel))
-            return;
-
-        var message;
-        if (text && text.length) {
-            message = `${ state.color(text) }\n`;
-        } else {
-            message = `\n`;
-        }
-
-        var method;
-        if (!this.isPartialOpen) {
-            console.info(message);
-        }
-        else {
-            process.stdout.write(message);
-        }
-        this.isPartialOpen = false;
     }
 
     /** Formats and writes a trace log marker.
@@ -346,7 +348,7 @@ class Logger {
     */
     mark(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
-            console.info(`[${ this.source }] ${ magenta(util.format(...val)) }`);
+            console.info(`[${ this.name }] ${ magenta(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -357,7 +359,7 @@ class Logger {
     */
     success(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
-            console.info(`[${ this.source }] ${ green(util.format(...val)) }`);
+            console.info(`[${ this.name }] ${ green(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
     }
@@ -378,6 +380,45 @@ class Logger {
             this.isPartialOpen = false;
         }
     }
+
+    /** Formats and writes the first portion of a message, using the given state. */
+    beginPartial(level, text, state) {
+        if (!this.canOutputAtLevel(level))
+            return;
+
+        const color = (state == null) ? level.color : state.color;
+        process.stdout.write(`[${ this.name }] ${ color(text) }`);
+        this.isPartialOpen = true;
+    }
+
+    /** Formats and writes the last portion of a message, on the same line as the first portion, using the given state. */
+    endPartial(level, text, state) {
+        if (!this.canOutputAtLevel(level))
+            return;
+
+        const color = (state == null) ? level.color : state.color;
+
+        var message;
+        if (text && text.length) {
+            message = `${ color(text) }\n`;
+        } else {
+            message = `\n`;
+        }
+
+        if (!this.isPartialOpen) {
+            if (text && text.length) {
+                console.info(`[${ this.name }] ${ message }`);
+            }
+            else {
+                console.info(`${ message }`);
+            }
+        }
+        else {
+            process.stdout.write(message);
+        }
+        this.isPartialOpen = false;
+    }
+
 }
 
 module.exports = {
@@ -386,5 +427,7 @@ module.exports = {
     LoggerOptions: LoggerOptions,
     LogLevel: LogLevel,
     getLogLevel: getLogLevel,
-    DEFAULT_LOG_LEVEL: DEFAULT_LOG_LEVEL
+    DEFAULT_LOG_LEVEL: DEFAULT_LOG_LEVEL,
+    getInstance: Logger.getInstance,
+    getSingleton: Logger.getSingleton
 }

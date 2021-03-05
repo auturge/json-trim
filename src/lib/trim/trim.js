@@ -4,9 +4,11 @@ const fs = require("fs");
 const isValid = require("is-valid-path");
 const { exit } = require("process");
 const { LogLevel, LogEntryState } = require("../utils/logging");
+const logger = require('../utils/logging').getSingleton('json-trim');
+
 const load = require("../utils/json-loader");
 
-function validateFileNames(logger, source, target) {
+function validateFileNames(source, target) {
     logger.mark('trim::validateFileNames');
     logger.debug('Validating filenames...');
 
@@ -35,15 +37,15 @@ function validateFileNames(logger, source, target) {
     logger.trace(`  Target: ${ target || "<return as function return value>" }`);
 }
 
-function execute(logger, config) {
+function execute(config) {
     logger.mark('trim::execute');
     logger.debug('Preparing the trim engine...');
     logger.trace('config:', config);
-    validateFileNames(logger, config.source, config.destination);
-    return trim(logger, config.source, config.destination, config.keylist);
+    validateFileNames(config.source, config.destination);
+    return trim(config.source, config.destination, config.keylist);
 }
 
-function trim(logger, source, target, keylist) {
+function trim(source, target, keylist) {
     logger.mark('trim::trim');
     logger.debug('Starting the trim engine.');
 
@@ -57,9 +59,9 @@ function trim(logger, source, target, keylist) {
     let sourceFilePath = path.resolve(source);
     let targetFilePath = target ? path.resolve(target) : null;
 
-    logger.beginPartial(LogLevel.WARN, "Trimming json... ");
-    logger.endPartial(LogLevel.DEBUG);
+    logger.beginPartial(LogLevel.INFO, "Trimming json... ", LogEntryState.NONE);
 
+    logger.endPartial(LogLevel.DEBUG);
     logger.debug(` `);
     logger.debug(`    SOURCE:    ${ sourceFilePath }`);
     logger.debug(`    TARGET:    ${ targetFilePath }`);
@@ -68,9 +70,9 @@ function trim(logger, source, target, keylist) {
     // get the source
     logger.debug(` `);
     logger.debug(`    Reading file at '${ sourceFilePath }'.`);
-    let loadResult = load(logger, sourceFilePath);
+    let loadResult = load(sourceFilePath);
     if (loadResult.error) {
-        logger.error(`\nERROR:${ loadResult.error }`);
+        logger.error(`\nERROR: ${ loadResult.error }`);
         process.exit(1);
     }
 
@@ -101,9 +103,9 @@ function trim(logger, source, target, keylist) {
     }
 
     // done!
-    logger.endPartial(LogLevel.ERROR, " done!", LogEntryState.SUCCESS);
+    logger.endPartial(LogLevel.INFO, " done!", LogEntryState.SUCCESS);
 
     return json;
 }
 
-module.exports = (logger, config) => execute(logger, config);
+module.exports = (config) => execute(config);
