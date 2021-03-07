@@ -25,7 +25,7 @@ function getConfigObject(cliOptions) {
     logger.trace('base configuration object:', options);
 
     logger.trace('Merging configuration into base object...');
-    var config = getConfigurationObject(DEFAULT_CONFIG, './trim.config.js', options);
+    var config = getConfigurationObject(DEFAULT_CONFIG, './trim.config.js', options.config);
     logger.trace('Configured object:', config);
 
     // apply json-trim specific overrides
