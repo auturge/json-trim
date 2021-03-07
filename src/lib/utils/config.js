@@ -72,7 +72,7 @@ function loadConfigFile(defaultPath, options) {
  * That is, config[2] overwrites config[1] overwrites config[0].
  */
 function mergeConfigFileIntoConfigObject(defaultConfig, configFile) {
-    var config = defaultConfig ? defaultConfig : DEFAULT_CONFIG;
+    var config = defaultConfig || {};
     mergeFile(config, configFile);
     return config;
 }
