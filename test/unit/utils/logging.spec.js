@@ -8,6 +8,10 @@ const { red, cyan, yellow, green, white, magenta } = require('colorette');
 
 describe('logging', () => {
 
+    function oneOf(list) {
+        var index = Math.floor(Math.random() * list.length)
+        return list[ index ];
+    }
     describe('Logger', () => {
         var logger;
 
@@ -1037,6 +1041,17 @@ describe('logging', () => {
                 sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ LogLevel.DEBUG.color(message) }`);
                 assert.isTrue(logger.isPartialOpen);
             });
+
+            it(`beginPartial - given a level, some text, and a state, outputs it using process.stdout.write, in the specified color, and sets isPartialOpen to true`, () => {
+                logger.logLevel = LogLevel.TRACE;
+                logger.isPartialOpen = false;
+                const state = oneOf(LogEntryState.list);
+
+                logger.beginPartial(LogLevel.DEBUG, message, state);
+
+                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ state.color(message) }`);
+                assert.isTrue(logger.isPartialOpen);
+            });
         });
 
         /** This will NOT output any check marks during the test run, unless it errors */
@@ -1095,6 +1110,43 @@ describe('logging', () => {
                 sinon.assert.calledOnceWithExactly(consoleStub, `\n`);
                 assert.isFalse(logger.isPartialOpen);
             });
+
+            it(`endPartial - given a level, some text, and a state, outputs it using process.stdout.write, in the specified color, and sets isPartialOpen to false`, () => {
+                logger.logLevel = LogLevel.TRACE;
+                logger.isPartialOpen = true;
+                const state = oneOf(LogEntryState.list);
+
+                logger.endPartial(LogLevel.DEBUG, message, state);
+
+                sinon.assert.calledOnceWithExactly(processStub, `${ state.color(message) }\n`);
+                assert.isFalse(logger.isPartialOpen);
+            });
+        });
+
+        describe('getInstance', () => {
+
+            it('getInstance - does not throw an error if no options are provided', () => {
+
+                assert.doesNotThrow(() => {
+                    logger = Logger.getInstance();
+                });
+
+                assert.isNotNull(logger, "Logger was null, and should not have been.");
+            });
+
+            [
+                { key: LogLevel.INFO, options: { quiet: false, silent: false, verbose: false } },
+                { key: LogLevel.ERROR, options: { quiet: true, silent: false, verbose: false } },
+                { key: LogLevel.SILENT, options: { quiet: false, silent: true, verbose: false } },
+                { key: LogLevel.TRACE, options: { quiet: false, silent: false, verbose: true } },
+            ].forEach(({ key, options }) => {
+                it(`getInstance - returns a new Logger, with the expected name and level [${ key }]`, () => {
+                    logger = Logger.getInstance(key.toString(), options);
+
+                    assert.equal(key.toString(), logger.name);
+                    assert.equal(key, logger.logLevel);
+                });
+            });
         });
     });
 
@@ -1104,7 +1156,7 @@ describe('logging', () => {
             it('ctor - given no name, throws an error', () => {
                 var name;
                 const index = AnyRandom.int();
-                const color = AnyRandom.oneOf([ red, cyan, yellow, green, white, magenta ]);
+                const color = oneOf([ red, cyan, yellow, green, white, magenta ]);
 
 
                 assert.throws(() => {
@@ -1115,7 +1167,7 @@ describe('logging', () => {
             it('ctor - given no index, throws an error', () => {
                 const name = AnyRandom.string(5, 10);
                 var index;
-                const color = AnyRandom.oneOf([ red, cyan, yellow, green, white, magenta ]);
+                const color = oneOf([ red, cyan, yellow, green, white, magenta ]);
 
                 assert.throws(() => {
                     new LogEntryState(name, index, color);
@@ -1208,7 +1260,7 @@ describe('logging', () => {
 
         describe('valueOf', () => {
             it('valueOf - returns the index of the log level', () => {
-                const level = AnyRandom.oneOf(LogLevel.list);
+                const level = oneOf(LogLevel.list);
 
                 const result = level.valueOf();
 

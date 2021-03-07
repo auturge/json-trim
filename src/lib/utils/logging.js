@@ -206,6 +206,8 @@ class LogEntryState {
 
     /** A log state used when one or more functionalities are not working, preventing some functionalities from working correctly. */
     static ERROR = Object.freeze(new LogEntryState("ERROR", 3, red));
+
+    static list = Object.freeze([ LogEntryState.NONE, LogEntryState.SUCCESS, LogEntryState.FAILURE, LogEntryState.WARN, LogEntryState.ERROR ]);
 }
 
 /** A class used to perform simple console logging. */
@@ -405,7 +407,10 @@ class Logger {
             message = `\n`;
         }
 
-        if (!this.isPartialOpen) {
+        if (this.isPartialOpen) {
+            process.stdout.write(message);
+        }
+        else {
             if (text && text.length) {
                 console.info(`[${ this.name }] ${ message }`);
             }
@@ -413,12 +418,8 @@ class Logger {
                 console.info(`${ message }`);
             }
         }
-        else {
-            process.stdout.write(message);
-        }
         this.isPartialOpen = false;
     }
-
 }
 
 module.exports = {
