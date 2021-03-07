@@ -25,17 +25,22 @@ const EXIT_CODES = {
     EXCEPTIONAL_ERROR: 128
 };
 
-function throwError(message, error, exitCode = EXIT_CODES.INTERNAL_ERROR) {
-    var errorToThrow = error || new Error(message);
-    errorToThrow.exitCode = exitCode || EXIT_CODES.INTERNAL_ERROR;
-    errorToThrow.internal = true;
-    errorToThrow.exceptional = false;
-    throw errorToThrow;
+function wrapError(message, innerError = null, exitCode = EXIT_CODES.INTERNAL_ERROR) {
+    var error = new Error(message);
+    error.exitCode = exitCode;
+    error.inner = innerError;
+    return error;
 }
 
-function throwException(message, error, exitCode) {
-    var exception = error || new Error(message);
-    exception.exitCode = exitCode || EXIT_CODES.EXCEPTIONAL_ERROR;
+function throwError(message, innerError = null, exitCode = EXIT_CODES.INTERNAL_ERROR) {
+    var error = wrapError(message, innerError, exitCode);
+    error.internal = true;
+    error.exceptional = false;
+    throw error;
+}
+
+function throwException(message, innerError = null, exitCode = EXIT_CODES.INTERNAL_ERROR) {
+    var exception = wrapError(message, innerError, exitCode);
     exception.internal = true;
     exception.exceptional = true;
     throw exception;
@@ -44,5 +49,6 @@ function throwException(message, error, exitCode) {
 module.exports = {
     throwError: throwError,
     throwException: throwException,
+    wrapError: wrapError,
     EXIT_CODES: EXIT_CODES
 }
