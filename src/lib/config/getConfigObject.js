@@ -1,6 +1,6 @@
 const path = require('path');
-const getConfigurationObject = require('../utils/config');
-const loadJSONFile = require('../utils/json-loader');
+const gco = require('../utils/config');
+const JSONLoader = require('../utils/json-loader');
 const { Logger, LogLevel, LogEntryState } = require("../utils/logging");
 const { throwError, EXIT_CODES } = require("../utils/errors");
 const filter = require('../utils/filter');
@@ -22,10 +22,13 @@ function getConfigObject(cliOptions) {
     // ensure the parsed options object has all the required properties
     logger.trace('Marshalling command-line options into base configuration object...');
     const options = marshalParsedOptionsIntoMinimalConfigOptions(cliOptions);
-    logger.trace('base configuration object:', options);
 
-    logger.trace('Merging configuration into base object...');
-    var config = getConfigurationObject(DEFAULT_CONFIG, './trim.config.js', options.config);
+    logger.trace('DEFAULT configuration options:', DEFAULT_CONFIG);
+    logger.trace('base configuration options:', options);
+
+    logger.trace('Merging configuration into base options...');
+    logger.mark('config::getConfigurationObject');
+    var config = gco.getConfigurationObject(DEFAULT_CONFIG, './trim.config.js', options.config);
     logger.trace('Configured object:', config);
 
     // apply json-trim specific overrides
@@ -35,7 +38,6 @@ function getConfigObject(cliOptions) {
 
     // validate the final config object
     validateConfigPaths(config);
-
 
     // identify the keys to keep - this is json-trim specific
     resolveKeyList(config);
@@ -48,12 +50,14 @@ function applyOverridesToConfig(config, opts) {
     logger.mark('jt_config::applyOverridesToConfig');
     logger.debug('Applying the CLI options to the configuration object.');
 
-    if (!opts) {
-        logger.trace('No options provided.');
-        return config;
-    }
-
     logger.beginPartial(LogLevel.DEBUG, 'Applying overrides... ');
+
+    if (!config) {
+        // This SHOULD never happen, since this method is called after merging
+        // the loaded config with a default config...
+        logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
+        throwError('Could not resolve configuration.', null, EXIT_CODES.CONFIGURATION_ERROR);
+    }
 
     // update the logger config
     if (opts.quiet) {
@@ -65,8 +69,11 @@ function applyOverridesToConfig(config, opts) {
     if (opts.verbose) {
         config.loglevel = LogLevel.TRACE;
     }
-    config.loglevel = LogLevel.coerce(config.loglevel);
-    logger.logLevel = config.loglevel;
+    const coercedLogLevel = LogLevel.coerce(config.loglevel);
+    logger.debug(`Setting log level to [${ coercedLogLevel }].`);
+    config.loglevel = coercedLogLevel;
+    logger.logLevel = coercedLogLevel;
+    logger.debug(`Log level set to [${ coercedLogLevel }].`);
 
     // merge on the command-line options
     var optsSource = getAbsolutePath(opts.source);
@@ -75,12 +82,11 @@ function applyOverridesToConfig(config, opts) {
     var optsDestination = getAbsolutePath(opts.destination);
     if (optsDestination != null) { config.destination = optsDestination; }
 
-    if (opts.whitelist != null) {
-        config.whitelist = opts.whitelist;
+    if (opts.keeplist != null) {
+        config.keeplist = opts.keeplist;
     }
 
     logger.endPartial(LogLevel.DEBUG, 'done.', LogEntryState.SUCCESS);
-
     return config;
 }
 
@@ -120,13 +126,8 @@ function resolveKeyList(config) {
 
     logger.beginPartial(LogLevel.DEBUG, 'Resolving the keylist... ');
 
-    if (!config.source) {
-        logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
-        throw new Error(`Could not resolve configuration: 'source' is not defined.`);
-    }
-
     // Get the keys that exist in the file
-    var loadResult = loadJSONFile(config.source);
+    var loadResult = JSONLoader.load(config.source);
     if (loadResult.error) {
         logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
         logger.error(`\nERROR: ${ loadResult.error }`);
@@ -135,7 +136,6 @@ function resolveKeyList(config) {
 
     var json = loadResult.content;
     var keylist = Object.keys(json);
-    // logger.trace('keys in json:', keylist);
 
     // If the config already has a KEYLIST, then delete it.
     // (That's MY property; get out of here with that shit!)
@@ -173,7 +173,6 @@ function validateConfigPaths(config) {
     logger.beginPartial(LogLevel.DEBUG, 'Validating paths... ');
     function isFieldMissing(field) {
         // determine if the property is null or undefined (unset).
-        if (!config) return true;
         return config[ field ] == null;
     }
 
@@ -190,13 +189,6 @@ function validateConfigPaths(config) {
             logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
             throwError(`Property '${ field }' must not be an empty string.`, null, EXIT_CODES.CONFIGURATION_ERROR);
         }
-    }
-
-    if (!config) {
-        // This SHOULD never happen, since this method is called after merging
-        // the loaded config with a default config...
-        logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
-        throwError('Could not resolve configuration.', null, EXIT_CODES.CONFIGURATION_ERROR);
     }
 
     throwIfMissing('source');

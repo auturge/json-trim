@@ -4,7 +4,7 @@ const { unwrap } = require("../../objects/helpers");
 
 const fs = require("fs");
 const { AnyRandom } = require('@auturge/testing');
-const load = require('../../../src/lib/utils/json-loader');
+const { load } = require('../../../src/lib/utils/json-loader');
 const json = require('../../objects/test.package.json')
 
 describe('json-loader', () => {

@@ -36,4 +36,4 @@ function load(absolutePath) {
     return result;
 }
 
-module.exports = (absolutePath) => load(absolutePath);
+module.exports = { load: load };

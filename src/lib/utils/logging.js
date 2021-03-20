@@ -285,6 +285,7 @@ class Logger {
     */
     fatal(...val) {
         if (this.canOutputAtLevel(LogLevel.FATAL)) {
+            if (this.isPartialOpen) { console.error(''); }
             console.error(`[${ this.name }] ${ red(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -296,6 +297,7 @@ class Logger {
     */
     error(...val) {
         if (this.canOutputAtLevel(LogLevel.ERROR)) {
+            if (this.isPartialOpen) { console.error(''); }
             console.error(`[${ this.name }] ${ red(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -306,6 +308,7 @@ class Logger {
      * This is best applied when unexpected behavior happened inside the application, but it is continuing its work and the key business features are operating as expected. */
     warn(...val) {
         if (this.canOutputAtLevel(LogLevel.WARN)) {
+            if (this.isPartialOpen) { console.warn(''); }
             console.warn(`[${ this.name }] ${ yellow(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -317,6 +320,7 @@ class Logger {
     */
     info(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
+            if (this.isPartialOpen) { console.info(''); }
             console.info(`[${ this.name }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -328,6 +332,7 @@ class Logger {
     */
     debug(...val) {
         if (this.canOutputAtLevel(LogLevel.DEBUG)) {
+            if (this.isPartialOpen) { console.info(''); }
             console.info(`[${ this.name }] ${ cyan(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -339,6 +344,7 @@ class Logger {
     */
     trace(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
+            if (this.isPartialOpen) { console.info(''); }
             console.info(`[${ this.name }] ${ white(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -350,6 +356,7 @@ class Logger {
     */
     mark(...val) {
         if (this.canOutputAtLevel(LogLevel.TRACE)) {
+            if (this.isPartialOpen) { console.info(''); }
             console.info(`[${ this.name }] ${ magenta(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -361,6 +368,7 @@ class Logger {
     */
     success(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
+            if (this.isPartialOpen) { console.info(''); }
             console.info(`[${ this.name }] ${ green(util.format(...val)) }`);
             this.isPartialOpen = false;
         }
@@ -378,6 +386,7 @@ class Logger {
     */
     raw(...val) {
         if (this.canOutputAtLevel(LogLevel.INFO)) {
+            if (this.isPartialOpen) { console.log(''); }
             console.log(...val);
             this.isPartialOpen = false;
         }

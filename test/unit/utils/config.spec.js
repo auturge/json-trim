@@ -5,7 +5,7 @@ const { assert } = require('chai');
 const { unwrap } = require("../../objects/helpers");
 const { AnyRandom, CharacterSet } = require('@auturge/testing');
 const configResolver = require('@auturge/config-resolver');
-const getConfigurationObject = require('../../../src/lib/utils/config');
+const { getConfigurationObject } = require('../../../src/lib/utils/config');
 
 describe('getConfigurationObject', () => {
 
@@ -92,7 +92,6 @@ describe('getConfigurationObject', () => {
     });
 
     it('getConfigurationObject - throws an error when the config file exists and does not export a function', () => {
-        var result;
         const relativePath = AnyRandom.string(5, 10, CharacterSet.ALPHA);
         const explicitPath = path.join(process.cwd(), relativePath);
         sinon.stub(fs, 'existsSync').returns(true);

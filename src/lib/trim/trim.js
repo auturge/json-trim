@@ -6,7 +6,7 @@ const { exit } = require("process");
 const { LogLevel, LogEntryState } = require("../utils/logging");
 const logger = require('../utils/logging').getSingleton('json-trim');
 
-const load = require("../utils/json-loader");
+const { load } = require("../utils/json-loader");
 
 function validateFileNames(source, target) {
     logger.mark('trim::validateFileNames');

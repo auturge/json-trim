@@ -32,7 +32,6 @@ function getConfigurationObject(defaultConfig, configFnArgs, defaultPath, explic
 }
 
 function validateArgs(defaultConfig, defaultPath, explicitPath) {
-
     // if the default config isn't passed, then we need a path
     if (!defaultConfig) {
         if (!(defaultPath && defaultPath.length) && !(explicitPath && explicitPath.length))
@@ -149,4 +148,6 @@ function mergeConfigFileIntoConfigObject(defaultConfig, configFile) {
     return Object.assign({}, defaultConfig, configFile);
 }
 
-module.exports = getConfigurationObject;
+module.exports = {
+    'getConfigurationObject': getConfigurationObject
+};

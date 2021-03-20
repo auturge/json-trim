@@ -5,7 +5,7 @@ const PROJECT_ROOT = path.resolve(__dirname, '../');
 module.exports = (env) => {
 
     const isProd = env && env[ "prod" ] === true;
-    const SOURCE = './README.md';
+    const SOURCE = './objects/test.package.json';
     const DESTINATION = './temp/{0}/package.json'.replace('{0}', isProd ? 'prod' : 'dev');
 
     const config = {
@@ -33,6 +33,8 @@ module.exports = (env) => {
             'main', ' repository'
         ]
     }
+
+    // console.log('Got config:', config);
 
     return config;
 };

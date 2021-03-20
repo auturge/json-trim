@@ -270,7 +270,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -280,7 +284,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -290,7 +298,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -300,7 +312,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -310,7 +326,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -320,7 +340,11 @@ describe('logging', () => {
 
                 logger.fatal(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -361,7 +385,11 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -371,7 +399,11 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -381,7 +413,11 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -391,7 +427,11 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -401,7 +441,11 @@ describe('logging', () => {
 
                 logger.error(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ red(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -450,7 +494,11 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ yellow(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -460,7 +508,11 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ yellow(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -470,7 +522,11 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ yellow(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -480,7 +536,11 @@ describe('logging', () => {
 
                 logger.warn(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ yellow(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ yellow(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -537,7 +597,11 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -547,7 +611,11 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -557,7 +625,11 @@ describe('logging', () => {
 
                 logger.info(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -623,7 +695,11 @@ describe('logging', () => {
 
                 logger.debug(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ cyan(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ cyan(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -633,7 +709,11 @@ describe('logging', () => {
 
                 logger.debug(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ cyan(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ cyan(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -707,7 +787,11 @@ describe('logging', () => {
 
                 logger.trace(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ white(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -781,7 +865,11 @@ describe('logging', () => {
 
                 logger.mark(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ magenta(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ magenta(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -838,7 +926,11 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ green(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -848,7 +940,11 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ green(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -858,7 +954,11 @@ describe('logging', () => {
 
                 logger.success(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, `[${ logger.name }] ${ green(util.format(message)) }`);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(`[${ logger.name }] ${ green(util.format(message)) }`)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -915,7 +1015,11 @@ describe('logging', () => {
 
                 logger.log(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -925,7 +1029,11 @@ describe('logging', () => {
 
                 logger.log(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -935,7 +1043,11 @@ describe('logging', () => {
 
                 logger.log(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
@@ -992,7 +1104,11 @@ describe('logging', () => {
 
                 logger.raw(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -1002,7 +1118,11 @@ describe('logging', () => {
 
                 logger.raw(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
 
@@ -1012,7 +1132,11 @@ describe('logging', () => {
 
                 logger.raw(message);
 
-                sinon.assert.calledOnceWithExactly(consoleStub, message);
+                sinon.assert.calledTwice(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(''),
+                    consoleStub.withArgs(message)
+                );
                 assert.isFalse(logger.isPartialOpen);
             });
         });
