@@ -130,7 +130,7 @@ function resolveKeyList(config) {
     var loadResult = JSONLoader.load(config.source);
     if (loadResult.error) {
         logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
-        logger.error(`\nERROR: ${ loadResult.error }`);
+        logger.error(loadResult.error);
         process.exit(1);
     }
 

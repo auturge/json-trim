@@ -264,7 +264,20 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
-            it(`fatal - sends the message to console.error, and closes any partial, when the logger is set to FATAL`, () => {
+            it(`fatal - sends the message to console.error, when the logger is set to FATAL`, () => {
+                logger.logLevel = LogLevel.FATAL;
+                logger.isPartialOpen = false;
+
+                logger.fatal(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
+            it(`fatal - sends a newline and the message to console.error, and closes any partial, when the logger is set to FATAL`, () => {
                 logger.logLevel = LogLevel.FATAL;
                 logger.isPartialOpen = true;
 
@@ -379,6 +392,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`error - sends the message to console.error, when the logger is set to ERROR`, () => {
+                logger.logLevel = LogLevel.ERROR;
+                logger.isPartialOpen = false;
+
+                logger.error(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ red(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`error - sends the message to console.error, and closes any partial, when the logger is set to ERROR`, () => {
                 logger.logLevel = LogLevel.ERROR;
                 logger.isPartialOpen = true;
@@ -488,6 +514,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`warn - sends the message to console.warn, when the logger is set to WARN`, () => {
+                logger.logLevel = LogLevel.WARN;
+                logger.isPartialOpen = false;
+
+                logger.warn(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ yellow(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`warn - sends the message to console.warn, and closes any partial, when the logger is set to WARN`, () => {
                 logger.logLevel = LogLevel.WARN;
                 logger.isPartialOpen = true;
@@ -591,6 +630,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`info - sends the message to console.info, when the logger is set to INFO`, () => {
+                logger.logLevel = LogLevel.INFO;
+                logger.isPartialOpen = false;
+
+                logger.info(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`info - sends the message to console.info, and closes any partial, when the logger is set to INFO`, () => {
                 logger.logLevel = LogLevel.INFO;
                 logger.isPartialOpen = true;
@@ -689,6 +741,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`debug - sends the message to console.debug, when the logger is set to DEBUG`, () => {
+                logger.logLevel = LogLevel.DEBUG;
+                logger.isPartialOpen = false;
+
+                logger.debug(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ cyan(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`debug - sends the message to console.info, and closes any partial, when the logger is set to DEBUG`, () => {
                 logger.logLevel = LogLevel.DEBUG;
                 logger.isPartialOpen = true;
@@ -781,6 +846,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`trace - sends the message to console.trace, when the logger is set to TRACE`, () => {
+                logger.logLevel = LogLevel.TRACE;
+                logger.isPartialOpen = false;
+
+                logger.trace(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ white(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`trace - sends the message to console.info, and closes any partial, when the logger is set to TRACE`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = true;
@@ -859,6 +937,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`mark - sends the message to console.info, when the logger is set to TRACE`, () => {
+                logger.logLevel = LogLevel.TRACE;
+                logger.isPartialOpen = false;
+
+                logger.mark(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ magenta(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`mark - sends the message to console.info, and closes any partial, when the logger is set to TRACE`, () => {
                 logger.logLevel = LogLevel.TRACE;
                 logger.isPartialOpen = true;
@@ -918,6 +1009,19 @@ describe('logging', () => {
                 logger.success(message);
 
                 sinon.assert.notCalled(consoleStub);
+            });
+
+            it(`success - sends the message to console.info, when the logger is set to TRACE`, () => {
+                logger.logLevel = LogLevel.INFO;
+                logger.isPartialOpen = false;
+
+                logger.success(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(`[${ logger.name }] ${ green(util.format(message)) }`)
+                );
+                assert.isFalse(logger.isPartialOpen);
             });
 
             it(`success - sends the message to console.info, and closes any partial, when the logger is set to INFO`, () => {
@@ -1009,6 +1113,19 @@ describe('logging', () => {
                 sinon.assert.notCalled(consoleStub);
             });
 
+            it(`log - sends the message to console.log, when the logger is set to INFO`, () => {
+                logger.logLevel = LogLevel.INFO;
+                logger.isPartialOpen = false;
+
+                logger.log(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(message)
+                );
+                assert.isFalse(logger.isPartialOpen);
+            });
+
             it(`log - sends the message to console.log, and closes any partial, when the logger is set to INFO`, () => {
                 logger.logLevel = LogLevel.INFO;
                 logger.isPartialOpen = true;
@@ -1096,6 +1213,19 @@ describe('logging', () => {
                 logger.raw(message);
 
                 sinon.assert.notCalled(consoleStub);
+            });
+
+            it(`raw - sends the message to console.log, when the logger is set to INFO`, () => {
+                logger.logLevel = LogLevel.INFO;
+                logger.isPartialOpen = false;
+
+                logger.log(message);
+
+                sinon.assert.calledOnce(consoleStub);
+                sinon.assert.callOrder(
+                    consoleStub.withArgs(message)
+                );
+                assert.isFalse(logger.isPartialOpen);
             });
 
             it(`raw - sends the message to console.log, and closes any partial, when the logger is set to INFO`, () => {
