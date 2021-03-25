@@ -1,79 +1,49 @@
 
 const path = require("path");
 const fs = require("fs");
-const isValid = require("is-valid-path");
-const { exit } = require("process");
+const { validateFileNames } = require('../utils/validate-filenames');
 const { LogLevel, LogEntryState } = require("../utils/logging");
+const { error } = require('../utils/results');
+const JSONLoader = require('../utils/json-loader');
+
 const logger = require('../utils/logging').getSingleton('json-trim');
-
-const { load } = require("../utils/json-loader");
-
-function validateFileNames(source, target) {
-    logger.mark('trim::validateFileNames');
-    logger.debug('Validating filenames...');
-
-    if (!fs.existsSync(source)) {
-        logger.error(`Could not find source file [${ source }].`);
-        exit(1);
-    }
-
-    // target might be null or undefined, which means return it in the pipe
-    if (target) {
-        if (!isValid(target)) {
-            logger.error(`${ target } is not a valid path.`);
-            exit(1);
-        }
-
-        // const targetFolder = target.match(/(.*)[\/\\]/)[ 1 ] || '';
-        const targetFolder = target.match(/(.*)[\\]/)[ 1 ] || '';
-        if (!fs.existsSync(targetFolder)) {
-            console.error(`Target folder [${ targetFolder }] does not exist.`);
-            exit(1);
-        }
-    }
-
-    logger.debug('Filenames are valid.');
-    logger.trace(`  Source: ${ source }`);
-    logger.trace(`  Target: ${ target || "<return as function return value>" }`);
-}
 
 function execute(config) {
     logger.mark('trim::execute');
     logger.debug('Preparing the trim engine...');
     logger.trace('config:', config);
-    validateFileNames(config.source, config.destination);
-    return trim(config.source, config.destination, config.keylist);
+
+    var validated = validateFileNames(config.source, config.destination);
+    if (validated.error)
+        return validated;
+
+    return trim(validated.source, validated.destination, config.keylist);
 }
 
-function trim(source, target, keylist) {
+function trim(source, destination, keylist) {
     logger.mark('trim::trim');
     logger.debug('Starting the trim engine.');
 
-    if (!source) {
-        logger.error('No source filename provided.');
-        exit(1);
-    }
-    // if target is missing, then don't try to write a file: return the result in the pipe.
+    // if destination is missing, then don't try to write a file: return the result in the pipe.
 
     // resolve the relative paths
     let sourceFilePath = path.resolve(source);
-    let targetFilePath = target ? path.resolve(target) : null;
+    let destinationFilePath = destination ? path.resolve(destination) : null;
 
     logger.beginPartial(LogLevel.INFO, "Trimming json... ", LogEntryState.NONE);
 
     logger.endPartial(LogLevel.DEBUG);
     logger.debug(` `);
-    logger.debug(`    SOURCE:    ${ sourceFilePath }`);
-    logger.debug(`    TARGET:    ${ targetFilePath }`);
-    logger.debug(`    KEYS:      ${ keylist }`);
+    logger.debug(`    SOURCE:      ${ sourceFilePath }`);
+    logger.debug(`    DESTINATION: ${ destinationFilePath }`);
+    logger.debug(`    KEYS:        ${ keylist }`);
 
     // get the source
     logger.debug(` `);
     logger.debug(`    Reading file at '${ sourceFilePath }'.`);
-    let loadResult = load(sourceFilePath);
+    let loadResult = JSONLoader.load(sourceFilePath);
     if (loadResult.error) {
-        logger.error(`\nERROR: ${ loadResult.error }`);
-        process.exit(1);
+        return error(`${ loadResult.error }`);
     }
 
     logger.trace(`   Source File:`, loadResult.content);
@@ -82,30 +52,28 @@ function trim(source, target, keylist) {
     let clone = JSON.parse(JSON.stringify(loadResult.content));
     if (keylist) {
         for (let key in clone) {
-            if (Object.prototype.hasOwnProperty.call(clone, key)) {
-                if (!keylist.includes(key)) {
-                    logger.debug(`      Removing key '${ key }'.`);
-                    delete clone[ key ];
-                }
+            if (!keylist.includes(key)) {
+                logger.debug(`      Removing key '${ key }'.`);
+                delete clone[ key ];
             }
         }
     } else {
         logger.debug('      No parts specified. Cloning the entire file.');
     }
 
-    let json = JSON.stringify(clone, null, 2);
+    let jsonString = JSON.stringify(clone, null, 2);
 
     // save the clone
-    if (targetFilePath) {
-        logger.debug(`    Writing file to '${ targetFilePath }'.`);
-        logger.trace(`   Output json:`, json);
-        fs.writeFileSync(targetFilePath, json, 'utf8');
+    if (destinationFilePath) {
+        logger.debug(`    Writing file to '${ destinationFilePath }'.`);
+        logger.trace(`   Output json:`, jsonString);
+        fs.writeFileSync(destinationFilePath, jsonString, 'utf8');
     }
 
     // done!
     logger.endPartial(LogLevel.INFO, " done!", LogEntryState.SUCCESS);
 
-    return json;
+    return clone;
 }
 
 module.exports = (config) => execute(config);

@@ -1,8 +1,12 @@
-const { assert } = require('chai');
-const { JsonTrim } = require("../../src/index.js");
+const src = "../../src/";
+const testObjects = "../objects";
 
-const { LogLevel } = require('../../src/lib/utils/logging.js');
-const logger = require('../../src/lib/utils/logging').getSingleton('unit-test');
+const { assert } = require('chai');
+
+const { existingSource, validDestination, enableTrace } = require(testObjects);
+
+const logger = require(src + '/lib/utils/logging').getSingleton('unit-test');
+const { JsonTrim } = require(src + "/index.js");
 
 describe('json-trim', () => {
 
@@ -21,7 +25,7 @@ describe('json-trim', () => {
 
     it('run - throws an error when the config object does not specify a source file', () => {
 
-        const opts = { 'destination': "./test/objects/test.output.json" };
+        const opts = { 'destination': validDestination };
 
         assert.throws(() => {
             trimmer.run(opts);
@@ -38,10 +42,10 @@ describe('json-trim', () => {
     })
 
     it('run - does not throw an error when the config object is proper', () => {
-        // logger.setLevel(LogLevel.DEBUG);
+        // enableTrace();
 
         const opts = {
-            'source': "./test/objects/test.package.json"
+            'source': existingSource
         };
 
         trimmer.run(opts);

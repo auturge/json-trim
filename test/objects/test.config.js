@@ -34,7 +34,5 @@ module.exports = (env) => {
         ]
     }
 
-    // console.log('Got config:', config);
-
     return config;
 };
