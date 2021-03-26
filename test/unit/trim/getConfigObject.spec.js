@@ -4,7 +4,7 @@ const testObjects = "../../objects";
 const path = require('path');
 const sinon = require('sinon');
 const { assert } = require('chai');
-const { AnyRandom } = require('@auturge/testing');
+const { AnyRandom, CharacterSet } = require('@auturge/testing');
 
 const { unwrap } = require(testObjects + "/helpers");
 const config = require(src + '/utils/config');
@@ -145,7 +145,7 @@ describe('getConfigObject', () => {
     });
 
     it(`getConfigObject - SOURCE - sets the proper source file`, () => {
-        var source = AnyRandom.string();
+        var source = AnyRandom.string(5, 8, CharacterSet.ALPHANUMERIC);
         const opts = { 'source': source };
         var absoluteSource = path.resolve(process.cwd(), source);
         const expected = {
@@ -162,7 +162,7 @@ describe('getConfigObject', () => {
     });
 
     it(`getConfigObject - DESTINATION - sets the proper destination file`, () => {
-        var destination = AnyRandom.string();
+        var destination = AnyRandom.string(5, 8, CharacterSet.ALPHANUMERIC);
         const opts = { 'destination': destination };
         var absoluteDestination = path.resolve(process.cwd(), destination);
         const expected = {

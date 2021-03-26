@@ -4,10 +4,9 @@ const commandLineUsage = require('command-line-usage');
 class CLIHelpProvider {
 
     /** Creates a new instance of the command-line help provider.
-     * @param {*} title
+     * @param {*} pkgJSON
      * @param {*} flags
      * @param {*} groups
-     * @param {*} commands
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
@@ -16,10 +15,9 @@ class CLIHelpProvider {
     }
 
     /** Creates a new instance of the command-line help provider.
-     * @param {*} title
+     * @param {*} pkgJSON
      * @param {*} flags
      * @param {*} groups
-     * @param {*} commands
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
@@ -36,7 +34,7 @@ class CLIHelpProvider {
         }
         this.logger = logger;
 
-        this.flagNames = this._getFlagNames(flags);
+        this.flagNames = this.#_getFlagNames(flags);
         this.allNames = [ ...this.flagNames ];
     }
 
@@ -68,10 +66,10 @@ class CLIHelpProvider {
         }
     }
 
-    _outputHelp(cliArgs) {
+    _outputHelp = (cliArgs) => {
         // set colorette options
         options.enabled = !cliArgs.includes('--no-color');
-        this._printInvalidArgWarning(cliArgs);
+        this.#_printInvalidArgWarning(cliArgs);
 
         const flagOrCommandUsed = this.allNames.filter((name) => {
             return cliArgs.includes(name);
@@ -79,15 +77,15 @@ class CLIHelpProvider {
 
         // Print full help when no flag or command is supplied with help
         if (flagOrCommandUsed) {
-            this._printSubHelp(flagOrCommandUsed);
+            this.#_printSubHelp(flagOrCommandUsed);
         } else {
-            this.logger.log(this._getCommandLineUsage());
+            this.logger.log(this.#_getCommandLineUsage());
         }
         this.logger.log('\n                  Made with ♥️ by auturge!');
     };
 
     // This function is responsible for printing command/flag scoped help
-    _printSubHelp(subject) {
+    #_printSubHelp = (subject) => {
         const info = this.options.flags;
         // Contains object with details about given subject
         const options = info.find((commandOrFlag) => {
@@ -117,15 +115,15 @@ class CLIHelpProvider {
     };
 
     // This function prints a warning about invalid flag
-    _printInvalidArgWarning = (args) => {
-        const invalidArgs = this._hasUnknownArgs(args, this.allNames);
+    #_printInvalidArgWarning = (args) => {
+        const invalidArgs = this.#_hasUnknownArgs(args, this.allNames);
         if (invalidArgs.length > 0) {
             const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
             this.logger.warn(`You provided an invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
         }
     };
 
-    _getCommandLineUsage() {
+    #_getCommandLineUsage = () => {
         const flags = this.options.flags;
         const title = this.options.title;
 
@@ -180,9 +178,9 @@ class CLIHelpProvider {
         return commandLineUsage(usageOpts);
     };
 
-    _outputVersion(args) {
+    _outputVersion = (args) => {
         // The command with which version is invoked
-        const invalidArgs = this._hasUnknownArgs(args, this.allNames);
+        const invalidArgs = this.#_hasUnknownArgs(args, this.allNames);
 
         if (invalidArgs.length > 0) {
             const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
@@ -194,9 +192,8 @@ class CLIHelpProvider {
         this.logger.log(`\n${ this.options.title } ${ this.options.version }\n`);
     };
 
-
     // Contains an array of strings with core cli flags and their aliases
-    _getFlagNames(flags) {
+    #_getFlagNames = (flags) => {
         return flags
             .map(({ alias, name }) => {
                 if (name === 'help') return [];
@@ -208,7 +205,7 @@ class CLIHelpProvider {
             .reduce((arr, val) => arr.concat(val), []);
     }
 
-    _hasUnknownArgs = (args, names) =>
+    #_hasUnknownArgs = (args, names) =>
         args.filter((e) => !names.includes(e) && !e.includes('color') && e !== 'version' && e !== '-v' && !e.includes('help') && e !== '-h');
 }
 

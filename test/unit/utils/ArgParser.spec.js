@@ -16,6 +16,8 @@ describe('ArgParser', () => {
     var argParser;
     var title;
 
+    // TODO figure out why I'm only getting 13/16 "functions" coverage
+
     describe('configure', () => {
         it('configure - sets properties correctly', () => {
             var parser = ArgParser.configure(title, flags, groups, logger);
