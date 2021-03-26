@@ -1,7 +1,7 @@
 
 const path = require("path");
 const fs = require("fs");
-const { validateFileNames } = require('../utils/validate-filenames');
+const { validateFileNames } = require('./validate-filenames');
 const { LogLevel, LogEntryState } = require("../utils/logging");
 const { error } = require('../utils/results');
 const JSONLoader = require('../utils/json-loader');

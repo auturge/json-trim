@@ -1,9 +1,11 @@
+const src = "../../../src/lib";
+const testObjects = "../../objects";
+
 const { assert, expect } = require('chai');
-const filter = require('../../../src/lib/utils/filter');
+
+const filter = require(src + '/utils/filter');
 
 describe('filter', () => {
-
-
 
     // // If the config has a trimlist, then trim out any entries that exist in the trimlist
     // // if it doesn't, then assume you mean to "keep them all"

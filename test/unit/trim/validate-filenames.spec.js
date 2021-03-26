@@ -1,15 +1,17 @@
-const { assert } = require('chai');
-const { AnyRandom, CharacterSet } = require('@auturge/testing');
+const src = "../../../src/lib";
+const testObjects = "../../objects";
 
 const path = require('path');
+const { assert } = require('chai');
+const { AnyRandom, CharacterSet } = require('@auturge/testing');
 
 const {
     existingSource, invalidSource, invalidDestination,
     validDestination, invalidFolder, driveRoot, separator
-} = require('../../objects/paths');
+} = require(testObjects + '/paths');
 
-const logger = require("../../../src/lib/utils/logging").getSingleton('unit-test');
-const { validateFileNames } = require('../../../src/lib/utils/validate-filenames');
+const logger = require(src + "/utils/logging").getSingleton('unit-test');
+const { validateFileNames } = require(src + '/trim/validate-filenames');
 
 describe('validate-filenames', () => {
 

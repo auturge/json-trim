@@ -1,8 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 const isValidPath = require("is-valid-path");
-const logger = require('./logging').getSingleton('json-trim');
-const { error, success } = require('./results');
+const logger = require('../utils/logging').getSingleton('json-trim');
+const { error, success } = require('../utils/results');
 
 function validateFileNames(source, destination) {
     logger.mark('trim::validateFileNames');

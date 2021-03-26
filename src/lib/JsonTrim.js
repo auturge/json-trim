@@ -1,6 +1,6 @@
 "use strict";
 
-const getConfigObject = require('./config/getConfigObject');
+const getConfigObject = require('./trim/getConfigObject');
 const execute = require('./trim/trim');
 const logger = require('./utils/logging').getSingleton('json-trim');
 

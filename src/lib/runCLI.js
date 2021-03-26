@@ -1,21 +1,33 @@
 "use strict";
 
-const title = 'json-trim';
+const pkgJSON = require('./../../package.json');
+const title = pkgJSON.name;
+process.title = title;
 
 const { coloretteOptions } = require('colorette');
 const levenshtein = require('fastest-levenshtein');
 
-const argParser = require('./cli/arg-parser');
-const { flags } = require('./cli/cli-flags');
-const { isCommandUsed } = require('./cli/arg-utils');
-const JsonTrim = require('./json-trim');
+const { CLIHelpProvider } = require('./utils/CLIHelpProvider');
+const { ArgParser } = require('./utils/ArgParser');
+
 const { EXIT_CODES } = require('./utils/errors');
+
+const { flags, groups } = require('./trim/cli-options');
+
+const JsonTrim = require('./JsonTrim');
 const logger = require('./utils/logging').getSingleton('json-trim');
 
-process.title = title;
-
 const runCLI = async (cliArgs) => {
-    const parsedArgs = argParser(flags, cliArgs, true, process.title);
+
+    CLIHelpProvider
+        .configure(pkgJSON, flags, groups, logger)
+        .handle(cliArgs);
+
+    const parsedArgs = ArgParser
+        .configure(title, flags, groups, logger)
+        .parse(cliArgs, true);
+
+    // const parsedArgs = argParser(flags, cliArgs, logger, true);
     logger.setOptions(parsedArgs.opts);
 
     logger.mark('runCLI::runCLI');
@@ -24,11 +36,6 @@ const runCLI = async (cliArgs) => {
     // Enable/Disable colors
     if (typeof parsedArgs.opts.color !== 'undefined') {
         coloretteOptions.enabled = Boolean(parsedArgs.opts.color);
-    }
-
-    const commandIsUsed = isCommandUsed(cliArgs);
-    if (commandIsUsed) {
-        return;
     }
 
     try {

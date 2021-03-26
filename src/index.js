@@ -1,4 +1,4 @@
-const JsonTrim = require('./lib/json-trim');
+const JsonTrim = require('./lib/JsonTrim');
 const { KEEPLISTS } = require("./lib/KEEPLISTS");
 
 module.exports = {

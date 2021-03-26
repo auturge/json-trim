@@ -1,14 +1,18 @@
+const src = "../../../src/lib";
+const testObjects = "../../objects";
+
+const path = require('path');
 const sinon = require('sinon');
 const { assert } = require('chai');
 const { AnyRandom } = require('@auturge/testing');
-const { unwrap } = require("../../objects/helpers");
-const config = require('../../../src/lib/utils/config');
-const JSONLoader = require('../../../src/lib/utils/json-loader');
 
-const path = require('path');
-const { LogLevel, DEFAULT_LOG_LEVEL } = require('../../../src/lib/utils/logging.js');
-const logger = require('../../../src/lib/utils/logging').getSingleton('unit-test');
-const getConfigObject = require('../../../src/lib/config/getConfigObject.js');
+const { unwrap } = require(testObjects + "/helpers");
+const config = require(src + '/utils/config');
+const JSONLoader = require(src + '/utils/json-loader');
+const { LogLevel, DEFAULT_LOG_LEVEL } = require(src + '/utils/logging.js');
+const logger = require(src + '/utils/logging').getSingleton('unit-test');
+
+const getConfigObject = require(src + '/trim/getConfigObject.js');
 
 describe('getConfigObject', () => {
 

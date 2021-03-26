@@ -5,7 +5,6 @@ const groups = {
     HELP_GROUP,
     BASIC_GROUP,
 };
-const commands = [];
 
 const flags = [
     {
@@ -62,7 +61,7 @@ const flags = [
     {
         name: 'help',
         usage: '--help',
-        alias: "-help",
+        alias: "h",
         type: Boolean,
         group: HELP_GROUP,
         description: 'Displays usage information',
@@ -71,13 +70,6 @@ const flags = [
         name: 'quiet',
         usage: '--quiet',
         alias: "q",
-        type: Boolean,
-        group: HELP_GROUP,
-        description: 'Toggles quiet mode. Will only output errors',
-    },
-    {
-        name: 'quiet',
-        usage: '--no-quiet',
         negative: true,
         type: Boolean,
         group: HELP_GROUP,
@@ -87,6 +79,7 @@ const flags = [
         name: 'verbose',
         usage: '--verbose',
         alias: "v",
+        negative: true,
         type: Boolean,
         group: HELP_GROUP,
         description: 'Toggles verbose mode',
@@ -103,6 +96,5 @@ const flags = [
 
 module.exports = {
     groups,
-    commands,
-    flags: flags
+    flags
 };

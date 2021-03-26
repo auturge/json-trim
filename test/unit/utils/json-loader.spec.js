@@ -1,11 +1,15 @@
-const sinon = require('sinon');
-const { assert } = require('chai');
-const { unwrap } = require("../../objects/helpers");
+const src = "../../../src/lib";
+const testObjects = "../../objects";
 
 const fs = require("fs");
+const sinon = require('sinon');
+const { assert } = require('chai');
 const { AnyRandom } = require('@auturge/testing');
-const { load } = require('../../../src/lib/utils/json-loader');
-const json = require('../../objects/test.package.json')
+
+const { unwrap } = require(testObjects + "/helpers");
+const json = require(testObjects + '/test.package.json')
+
+const { load } = require(src + '/utils/json-loader');
 
 describe('json-loader', () => {
 
