@@ -1,6 +1,7 @@
+// const { version } = require('commander');
 const commander = require('commander');
-const runHelp = require('./groups/runHelp');
-const runVersion = require('./groups/runVersion');
+const getHelp = require('./groups/runHelp');
+const getVersion = require('./groups/runVersion');
 
 const logger = require('../utils/logging').getSingleton('json-trim');
 
@@ -10,33 +11,30 @@ const logger = require('../utils/logging').getSingleton('json-trim');
  *
  * @param {object[]} options Array of objects with details about flags
  * @param {string[]} args process.argv or it's subset
- * @param {boolean} argsOnly false if all of process.argv has been provided, true if
+ * @param {boolean} argsOnly `false` if all of process.argv has been provided, `true` if
  * args is only a subset of process.argv that removes the first couple elements
  */
-const argParser = (options, args, argsOnly = false, name = '') => {
+const argParser = (options, argsIn, argsOnly = false, name = '') => {
     const parser = new commander.Command();
 
     // Set parser name
     parser.name(name);
     parser.storeOptionsAsProperties(false);
 
+    const args = argsIn.map((it) => {
+        return (typeof (it) === "string") ? it.toLowerCase() : it;
+    });
+
     // Use customized help output
     if (args.includes('--help') || args.includes('help')) {
-        runHelp(args);
-        process.exit(0);
+        getHelp.run(args);
+        return process.exit(0);
     }
 
     // Use Customized version info
     if (args.includes('--version') || args.includes('-ver')) {
-        runVersion(args);
-        process.exit(0);
-    }
-
-    // Set the test mode variable, for use in unit/functional testing to prevent spam logging during unit tests
-    const testArgumentIndex = args.indexOf('--quiet-test');
-    const testMode = testArgumentIndex != -1;
-    if (testMode) {
-        args.splice(testArgumentIndex, 1);
+        getVersion.run(args);
+        return process.exit(0);
     }
 
     // Allow execution if unknown arguments are present
@@ -45,47 +43,17 @@ const argParser = (options, args, argsOnly = false, name = '') => {
     // Register options on the parser
     options.reduce((parserInstance, option) => {
         let optionType = option.type;
-        let isStringOrBool = false;
-
-        if (Array.isArray(optionType)) {
-            // filter out duplicate types
-            optionType = optionType.filter((type, index) => {
-                return optionType.indexOf(type) === index;
-            });
-
-            // the only multi type currently supported is String and Boolean,
-            // if there is a case where a different multi type is needed it
-            // must be added here
-            if (optionType.length === 0) {
-                // if no type is provided in the array fall back to Boolean
-                optionType = Boolean;
-            } else if (optionType.length === 1 || optionType.length > 2) {
-                // treat arrays with 1 or > 2 args as a single type
-                optionType = optionType[ 0 ];
-            } else {
-                // only String and Boolean multi type is supported
-                if (optionType.includes(Boolean) && optionType.includes(String)) {
-                    isStringOrBool = true;
-                } else {
-                    optionType = optionType[ 0 ];
-                }
-            }
-        }
 
         const flags = option.alias ? `-${ option.alias }, --${ option.name }` : `--${ option.name }`;
 
         let flagsWithType = flags;
 
-        if (isStringOrBool) {
-            // commander recognizes [value] as an optional placeholder,
-            // making this flag work either as a string or a boolean
-            flagsWithType = `${ flags } [value]`;
-        } else if (optionType !== Boolean) {
+        if (optionType !== Boolean) {
             // <value> is a required placeholder for any non-Boolean types
             flagsWithType = `${ flags } <value>`;
         }
 
-        if (isStringOrBool || optionType === Boolean || optionType === String) {
+        if (optionType === Boolean || optionType === String) {
             if (option.multiple) {
                 // a multiple argument parsing function
                 const multiArg = (value, previous = []) => previous.concat([ value ]);
@@ -98,6 +66,8 @@ const argParser = (options, args, argsOnly = false, name = '') => {
                 const multiArg = (value, previous = {}) => {
                     // this ensures we're only splitting by the first `=`
                     const [ allKeys, val ] = value.split(/=(.+)/, 2);
+
+                    // this regex splits on .
                     const splitKeys = allKeys.split(/\.(?!$)/);
 
                     let prevRef = previous;
@@ -129,8 +99,7 @@ const argParser = (options, args, argsOnly = false, name = '') => {
             // this will parse the flag as a number
             parserInstance.option(flagsWithType, option.description, Number, option.defaultValue);
         } else {
-            // in this case the type is a parsing function
-            parserInstance.option(flagsWithType, option.description, optionType, option.defaultValue).action(() => { });
+            throw new Error(`Option type [${ flagsWithType }] not supported.`);
         }
 
         if (option.negative) {
@@ -154,6 +123,10 @@ const argParser = (options, args, argsOnly = false, name = '') => {
     const unknownArgs = result.args;
 
     args.forEach((arg) => {
+        // check for negation ('--no-')
+        if (typeof (arg) !== "string")
+            return;
+
         const flagName = arg.slice(5);
         const option = options.find((opt) => opt.name === flagName);
         const flag = `--${ flagName }`;
@@ -176,16 +149,9 @@ const argParser = (options, args, argsOnly = false, name = '') => {
         }
     });
 
-    Object.keys(opts).forEach((key) => {
-        if (opts[ key ] === undefined) {
-            delete opts[ key ];
-        }
-    });
-
     return {
         unknownArgs,
-        opts,
-        isTestMode: testMode
+        opts
     };
 };
 

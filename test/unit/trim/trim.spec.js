@@ -21,7 +21,7 @@ describe('trim', () => {
 
     afterEach(() => {
         logger.enable();
-    })
+    });
 
     it('trim - returns an error object when the source file does not exist', () => {
         var config = {

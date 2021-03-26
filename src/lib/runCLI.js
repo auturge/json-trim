@@ -46,7 +46,7 @@ const runCLI = async (cliArgs) => {
                 }
             });
 
-            process.exit(EXIT_CODES.INVALID_COMMAND_LINE);
+            return process.exit(EXIT_CODES.INVALID_COMMAND_LINE);
         }
 
         const opts = parsedArgs.opts;
@@ -64,7 +64,7 @@ const runCLI = async (cliArgs) => {
             logger.error(error);
         }
 
-        process.exit(exitCode);
+        return process.exit(exitCode);
     }
 }
 

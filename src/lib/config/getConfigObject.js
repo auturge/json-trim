@@ -131,7 +131,7 @@ function resolveKeyList(config) {
     if (loadResult.error) {
         logger.endPartial(LogLevel.DEBUG, "failed.", LogEntryState.FAILURE);
         logger.error(loadResult.error);
-        process.exit(1);
+        return process.exit(1);
     }
 
     var json = loadResult.content;

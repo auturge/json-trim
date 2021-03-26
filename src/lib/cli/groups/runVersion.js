@@ -23,24 +23,24 @@ const outputVersion = (args) => {
             }
         } catch (e) {
             logger.error('Error: External package not found.');
-            process.exit(2);
+            return process.exit(2);
         }
     }
 
     if (commandsUsed.length > 1) {
         logger.error('You provided multiple commands. Please use only one command at a time.\n');
-        process.exit(2);
+        return process.exit(2);
     }
 
     if (invalidArgs.length > 0) {
         const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
         logger.error(`Error: Invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
         logger.info('Run json-trim --help to see available commands and arguments.\n');
-        process.exit(2);
+        return process.exit(2);
     }
 
     const pkgJSON = require('../../../../package.json');
     logger.raw(`\njson-trim ${ pkgJSON.version }\n`);
 };
 
-module.exports = outputVersion;
+module.exports = { 'run': outputVersion };

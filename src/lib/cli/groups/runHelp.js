@@ -126,4 +126,4 @@ const outputHelp = (cliArgs) => {
     logger.raw('\n                  Made with ♥️ by auturge!');
 };
 
-module.exports = outputHelp;
+module.exports = { 'run': outputHelp };
