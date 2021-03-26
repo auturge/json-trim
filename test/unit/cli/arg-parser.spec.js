@@ -11,7 +11,7 @@ const argParser = require(src + '/cli/arg-parser');
 const getHelp = require(src + '/cli/groups/runHelp');
 const getVersion = require(src + '/cli/groups/runVersion');
 
-describe.only('arg-parser', () => {
+describe('arg-parser', () => {
 
     var exit, help, version;
     var exited = false;
