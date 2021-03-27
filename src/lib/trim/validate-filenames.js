@@ -42,8 +42,7 @@ function validateFileNames(source, destination) {
 function getFilenameAtRoot(source, destParts) {
     const sourceParts = path.parse(source);
 
-    console.log('destParts', destParts);
-    // on linux, drive root 'root' and 'dir' will both be '/'
+    // on Unix, drive root 'root' and 'dir' will both be '/'
 
     if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
         destParts.root += path.sep;
@@ -59,6 +58,19 @@ function getFilenameAtRoot(source, destParts) {
     console.log(JSON.stringify(destParts, null, 2));
 
     const destination = path.format(destParts);
+
+    console.log('destination before', destination);
+
+    // Unix: make sure we didn't just accidentally specify a network path
+    if (destParts.root === path.sep && destParts.dir === path.sep) {
+        const nono = `${ path.sep }${ path.sep }`;
+        if (destination.startsWith(nono)) {
+            destination = destination.slice(1);
+        }
+    }
+
+    console.log('destination after', destination);
+
     return destination;
 }
 
