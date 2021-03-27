@@ -1,5 +1,5 @@
 const JsonTrim = require('./lib/JsonTrim');
-const { KEEPLISTS } = require("./lib/KEEPLISTS");
+const { KEEPLISTS } = require("./resource/KEEPLISTS");
 
 module.exports = {
     JsonTrim: JsonTrim,

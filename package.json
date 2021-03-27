@@ -17,10 +17,6 @@
     },
     "bin": "./bin/cli.js",
     "main": "./lib/json-trim.js",
-    "files": [
-        "bin",
-        "lib"
-    ],
     "devDependencies": {
         "@auturge/testing": "latest",
         "chai": "^4.3.0",
@@ -57,7 +53,7 @@
         "~copy:changelog": "shx cp ./CHANGELOG.md ./dist",
         "~copy:package:json": "node ./src/bin/cli -c ./conf/trim.config.js --env=dist",
         "~copy:readme": "shx cp ./README.md ./dist",
-        "~copy:source": "shx cp -R ./src/lib ./src/bin ./dist/",
+        "~copy:source": "shx cp -R ./src/lib ./src/bin ./src/resource ./src/index.js ./dist/",
         "~copy:license": "shx cp ./LICENSE ./dist",
         "~mkdir:dist": "shx mkdir ./dist",
         "~test:clean": "shx rm -rf coverage",

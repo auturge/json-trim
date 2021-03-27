@@ -1,5 +1,10 @@
 const commander = require('commander');
 
+const DEFAULT_OPTS = {
+    unknownArgs: [],
+    opts: []
+};
+
 class ArgParser {
 
     /** Creates a new instance of the command-line argument parser.
@@ -40,18 +45,21 @@ class ArgParser {
      */
     parse = (args, argsOnly = false) => {
 
-        // TODO Guard code
-
-        // convert the args to lowercase
-        args = args.map((it) => {
-            return (typeof (it) === "string") ? it.toLowerCase() : it;
-        });
+        if (args && args.length) {
+            // convert the args to lowercase
+            args = args.map((it) => {
+                return (typeof (it) === "string") ? it.toLowerCase() : it;
+            });
+        }
 
         // store the args
         this.args = args;
 
+        if (!args || !args.length)
+            return DEFAULT_OPTS;
+
         // Configure the parser
-        const parser = this.#_configureNewParser(this.options);
+        const parser = this._configureNewParser(this.options);
 
         // if we are parsing a subset of process.argv that includes
         // only the arguments themselves (e.g. ['--option', 'value'])
@@ -64,7 +72,7 @@ class ArgParser {
         const opts = result.opts();
         const unknownArgs = result.args;
 
-        this.#_guardAgainstUseAndNegation(args, this.options.flags, unknownArgs);
+        this._guardAgainstUseAndNegation(args, this.options.flags, unknownArgs);
 
         return {
             unknownArgs,
@@ -72,7 +80,7 @@ class ArgParser {
         };
     }
 
-    #_configureNewParser = (options) => {
+    _configureNewParser = (options) => {
         const parser = new commander.Command();
 
         parser.name(options.title);
@@ -153,7 +161,7 @@ class ArgParser {
         return parser;
     };
 
-    #_guardAgainstUseAndNegation = (args, flags, unknownArgs) => {
+    _guardAgainstUseAndNegation = (args, flags, unknownArgs) => {
         // check for negation (e.g., '--no-')
         args.forEach((arg) => {
             if (typeof (arg) !== "string")

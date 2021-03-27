@@ -8,6 +8,13 @@ const groups = {
 
 const flags = [
     {
+        name: 'color',
+        usage: '--color',
+        negative: true,
+        type: Boolean,
+        description: 'Enables color logging (on by default).  Use --no-color to disable.',
+    },
+    {
         name: 'config',
         usage: '--config <path to json-trim configuration file>',
         alias: 'c',

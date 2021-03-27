@@ -1,33 +1,29 @@
 "use strict";
 
-const pkgJSON = require('./../../package.json');
+const pkgJSON = require('../../package.json');
 const title = pkgJSON.name;
 process.title = title;
 
-const { coloretteOptions } = require('colorette');
+const { options: coloretteOptions } = require('colorette');
 const levenshtein = require('fastest-levenshtein');
 
 const { CLIHelpProvider } = require('./utils/CLIHelpProvider');
 const { ArgParser } = require('./utils/ArgParser');
-
 const { EXIT_CODES } = require('./utils/errors');
-
-const { flags, groups } = require('./trim/cli-options');
-
-const JsonTrim = require('./JsonTrim');
 const logger = require('./utils/logging').getSingleton('json-trim');
+const { flags, groups } = require('./trim/cli-options');
+const JsonTrim = require('./JsonTrim');
 
-const runCLI = async (cliArgs) => {
+const runCLI = (cliArgs) => {
 
     CLIHelpProvider
-        .configure(pkgJSON, flags, groups, logger)
+        .configure(pkgJSON, flags, logger)
         .handle(cliArgs);
 
     const parsedArgs = ArgParser
         .configure(title, flags, groups, logger)
         .parse(cliArgs, true);
 
-    // const parsedArgs = argParser(flags, cliArgs, logger, true);
     logger.setOptions(parsedArgs.opts);
 
     logger.mark('runCLI::runCLI');
@@ -44,7 +40,9 @@ const runCLI = async (cliArgs) => {
         // handle unknown args
         if (parsedArgs.unknownArgs.length > 0) {
             parsedArgs.unknownArgs.forEach(async (unknown) => {
-                logger.error(`Unknown argument: ${ unknown }`);
+                const message = `Unknown argument: ${ unknown }`;
+                logger.error(message);
+                // console.error(message);
 
                 const strippedFlag = unknown.substr(2);
                 const found = flags.find((flag) => levenshtein.distance(strippedFlag, flag.name) < 3);
@@ -75,4 +73,4 @@ const runCLI = async (cliArgs) => {
     }
 }
 
-module.exports = runCLI;
+module.exports = { runCLI };
