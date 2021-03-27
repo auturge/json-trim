@@ -10,8 +10,8 @@ class CLIHelpProvider {
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
-    static configure(pkgJSON, flags, groups, logger = console) {
-        return new CLIHelpProvider(pkgJSON, flags, groups, logger);
+    static configure(pkgJSON, flags, logger = console) {
+        return new CLIHelpProvider(pkgJSON, flags, logger);
     }
 
     /** Creates a new instance of the command-line help provider.
@@ -21,26 +21,33 @@ class CLIHelpProvider {
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
-    constructor(pkgJSON, flags, groups, logger = console) {
-
-        // TODO: guard code
+    constructor(pkgJSON, flags, logger = console) {
+        if (!pkgJSON || !pkgJSON.name || pkgJSON.version == null) {
+            throw new Error('Must provide a valid package.json object.');
+        }
+        if (!flags) {
+            throw new Error('Must specify a set of flags/options.');
+        }
 
         this.options = {
             packageJSON: pkgJSON,
             title: pkgJSON.name,
             version: pkgJSON.version,
-            groups: groups,
             flags: flags,
         }
         this.logger = logger;
 
-        this.flagNames = this.#_getFlagNames(flags);
+        this.flagNames = this._getFlagNames(flags);
         this.allNames = [ ...this.flagNames ];
     }
 
-    handle(args) {
+    handle(args, requireArgs = false) {
+        if (!(args && args.length)) {
+            if (requireArgs)
+                throw new Error('Arguments are required.');
 
-        // TODO Guard code
+            return;
+        }
 
         // convert the args to lowercase
         args = args.map((it) => {
@@ -69,7 +76,7 @@ class CLIHelpProvider {
     _outputHelp = (cliArgs) => {
         // set colorette options
         options.enabled = !cliArgs.includes('--no-color');
-        this.#_printInvalidArgWarning(cliArgs);
+        this._printInvalidArgWarning(cliArgs);
 
         const flagOrCommandUsed = this.allNames.filter((name) => {
             return cliArgs.includes(name);
@@ -77,53 +84,62 @@ class CLIHelpProvider {
 
         // Print full help when no flag or command is supplied with help
         if (flagOrCommandUsed) {
-            this.#_printSubHelp(flagOrCommandUsed);
+            this._printSubHelp(flagOrCommandUsed);
         } else {
-            this.logger.log(this.#_getCommandLineUsage());
+            this.logger.log(this._getCommandLineUsage());
         }
         this.logger.log('\n                  Made with ♥️ by auturge!');
     };
 
+    _displayText = (header, text) => {
+        const formattedHeader = bold(underline(header));
+        this.logger.log(`${ formattedHeader }: ${ text }`);
+    }
+
     // This function is responsible for printing command/flag scoped help
-    #_printSubHelp = (subject) => {
+    _printSubHelp = (subject) => {
         const info = this.options.flags;
         // Contains object with details about given subject
-        const options = info.find((commandOrFlag) => {
+        const option = info.find((commandOrFlag) => {
             return commandOrFlag.name === subject.slice(2) || commandOrFlag.alias === subject.slice(1);
         });
 
-        const header = (head) => bold(underline(head));
-        const flagAlias = options.alias ? (` -${ options.alias },`) : '';
-        const usage = yellow(`${ this.options.title }${ flagAlias } ${ options.usage }`);
-        const description = options.description;
-        const link = options.link;
+        const flagAlias = option.alias ? (` -${ option.alias },`) : '';
+        const usage = yellow(`${ this.options.title }${ flagAlias } ${ option.usage }`);
+        const description = option.description;
+        const link = option.link;
 
-        this.logger.log(`${ header('Usage') }: ${ usage }`);
-        this.logger.log(`${ header('Description') }: ${ description }`);
-
+        this._displayText('Usage', usage);
+        this._displayText('Description', description);
         if (link) {
-            this.logger.log(`${ header('Documentation') }: ${ link }`);
-        }
-
-        if (options.flags) {
-            const flags = commandLineUsage({
-                header: 'Options',
-                optionList: options.flags,
-            });
-            this.logger.log(flags);
+            this._displayText('Documentation', link);
         }
     };
 
-    // This function prints a warning about invalid flag
-    #_printInvalidArgWarning = (args) => {
-        const invalidArgs = this.#_hasUnknownArgs(args, this.allNames);
+    // This function checks for and prints a warning about invalid flag
+    _printInvalidArgWarning = (args) => {
+        const invalidArgs = this._hasUnknownArgs(args, this.allNames);
         if (invalidArgs.length > 0) {
-            const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
-            this.logger.warn(`You provided an invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
+            this.logger.warn(`You provided an invalid option '${ invalidArgs[ 0 ] }'.`);
         }
     };
 
-    #_getCommandLineUsage = () => {
+    // This function checks for and prints an error about invalid flag
+    _printInvalidArgError = (args) => {
+        const invalidArgs = this._hasUnknownArgs(args, this.allNames);
+        if (invalidArgs.length > 0) {
+            this.logger.error(`Error: Invalid option '${ invalidArgs[ 0 ] }'.`);
+            this.logger.info(`Run ${ this.options.title } --help to see available commands and arguments.\n`);
+            return process.exit(2);
+        }
+    };
+
+    _getCommandLineUsage = () => {
+        const usageOpts = this._getCommandLineUsageOptions();
+        return commandLineUsage(usageOpts);
+    };
+
+    _getCommandLineUsageOptions = () => {
         const flags = this.options.flags;
         const title = this.options.title;
 
@@ -138,16 +154,17 @@ class CLIHelpProvider {
                 } ];
             }, []);
         const titleText = bold('⬡                     ') + underline(title) + bold('                     ⬡');
+
         // const desc = 'The build tool for modern web applications';
         // const websitelink = '         ' + underline('https://webpack.js.org');
 
         const usage = bold('Usage') + ': ' + '`' + o(`${ title } [...options]`) + '`';
         const examples = bold('Example') + ': ' + '`' + o(`${ title } help --flag`) + '`';
 
-        const hh = `          ${ titleText }\n
-		${ usage }\n
-		${ examples }\n
-`;
+        const hh = `          ` +
+            `${ titleText }` + `\n\n` +
+            `${ usage }` + `\n\n` +
+            `${ examples }` + `\n\n`;
         //  ${websitelink}\n
         // ${desc}\n
 
@@ -163,11 +180,14 @@ class CLIHelpProvider {
                 header: 'Options',
                 optionList: flags
                     .map((e) => {
-                        if (e.type.length > 1) e.type = e.type[ 0 ];
+                        // don't support array'd option types
+                        // if (e.type.length > 1) e.type = e.type[ 0 ];
+
                         // Here we replace special characters with chalk's escape
                         // syntax (`\$&`) to avoid chalk trying to re-process our input.
                         // This is needed because chalk supports a form of `{var}`
                         // interpolation.
+
                         e.description = e.description.replace(/[{}\\]/g, '\\$&');
                         return e;
                     })
@@ -175,25 +195,17 @@ class CLIHelpProvider {
             })
         }
 
-        return commandLineUsage(usageOpts);
+        return usageOpts;
     };
 
     _outputVersion = (args) => {
-        // The command with which version is invoked
-        const invalidArgs = this.#_hasUnknownArgs(args, this.allNames);
-
-        if (invalidArgs.length > 0) {
-            const argType = invalidArgs[ 0 ].startsWith('-') ? 'option' : 'command';
-            this.logger.error(`Error: Invalid ${ argType } '${ invalidArgs[ 0 ] }'.`);
-            this.logger.info(`Run ${ title } --help to see available commands and arguments.\n`);
-            return process.exit(2);
-        }
+        this._printInvalidArgError(args);
 
         this.logger.log(`\n${ this.options.title } ${ this.options.version }\n`);
     };
 
     // Contains an array of strings with core cli flags and their aliases
-    #_getFlagNames = (flags) => {
+    _getFlagNames = (flags) => {
         return flags
             .map(({ alias, name }) => {
                 if (name === 'help') return [];
@@ -205,7 +217,7 @@ class CLIHelpProvider {
             .reduce((arr, val) => arr.concat(val), []);
     }
 
-    #_hasUnknownArgs = (args, names) =>
+    _hasUnknownArgs = (args, names) =>
         args.filter((e) => !names.includes(e) && !e.includes('color') && e !== 'version' && e !== '-v' && !e.includes('help') && e !== '-h');
 }
 

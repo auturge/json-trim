@@ -72,6 +72,7 @@
         "env": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json --env=dog",
         "w": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json --env production=staging --env dog -w name -w version -w description",
         "h": "node ./src/bin/cli -h",
+        "hs": "node ./src/bin/cli help -s",
         "hq": "node ./src/bin/cli help --quiet",
         "help": "node ./src/bin/cli --help",
         "v": "node ./src/bin/cli -v",
