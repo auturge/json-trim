@@ -105,6 +105,12 @@ describe('validate-filenames', () => {
     it(`validateFileNames - setting the destination path to the drive root with a path separator sets the destination to the source filename at the drive root`, () => {
         const source = existingSource;
         var root = driveRoot;  // e.g., 'E:\'
+        var sourceParts = path.parse(source);
+        var destParts = path.parse(driveRoot);
+        destParts.base = sourceParts.base;
+        destParts.ext = sourceParts.ext;
+        destParts.name = sourceParts.name;
+        const dest = path.format(destParts);
 
         const result = validateFileNames(source, root);
 
@@ -113,7 +119,7 @@ describe('validate-filenames', () => {
                 error: null,
                 code: 0,
                 source: existingSource,
-                destination: root + path.basename(source)
+                destination: dest
             }
         );
     });
