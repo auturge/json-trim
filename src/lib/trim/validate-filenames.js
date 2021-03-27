@@ -42,15 +42,22 @@ function validateFileNames(source, destination) {
 function getFilenameAtRoot(source, destParts) {
     const sourceParts = path.parse(source);
 
+    console.log('destParts', destParts);
+    // on linux, drive root 'root' and 'dir' will both be '/'
+
     if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
         destParts.root += path.sep;
     }
     if (destParts.dir.length == 0 || destParts.dir.slice(-1) != path.sep) {
         destParts.dir += path.sep;
     }
+
     destParts.base = sourceParts.base;
     destParts.ext = sourceParts.ext;
     destParts.name = sourceParts.name;
+
+    console.log(JSON.stringify(destParts, null, 2));
+
     const destination = path.format(destParts);
     return destination;
 }
