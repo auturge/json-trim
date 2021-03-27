@@ -8,54 +8,61 @@ function validateFileNames(source, destination) {
     logger.mark('trim::validateFileNames');
     logger.debug('Validating filenames...');
 
+    console.log('source', source);
+    console.log('destination', destination);
+
     if (!fs.existsSync(source)) {
         return error(`Could not find source file [${ source }].`);
     }
+    logger.trace(`  Source:      ${ source }`);
 
-    // destination might be null or undefined, which means return it in the pipe
-    if (destination) {
-        if (!isValidPath(destination)) {
-            return error(`${ destination } is not a valid path.`);
-        }
-
-        // destination might be a folder.
-        // if it is, then re-set it to the original filename, at the destination path.
-        const destParts = path.parse(destination);
-        if (destParts.base == "") {
-            destination = getFilenameAtRoot(source, destParts);
-        }
-
-        var destinationFolder = path.dirname(destination);
-
-        if (!fs.existsSync(destinationFolder)) {
-            return error(`Destination folder [${ destinationFolder }] does not exist.`);
-        }
+    // destination might be null or undefined, which is fine.
+    // That just means we should return the result in the pipe.
+    if (!destination) {
+        logger.trace(`  Destination: <pipe>`);
+        return success({ 'source': source, 'destination': null });
     }
 
-    logger.debug('Filenames are valid.');
-    logger.trace(`  Source:      ${ source }`);
-    logger.trace(`  Destination: ${ destination || null }`);
+    if (!isValidPath(destination)) {
+        return error(`${ destination } is not a valid path.`);
+    }
+
+    // destination might be a folder.
+    // if it is, then re-set it to the original filename,
+    // at the destination path.
+    const sourceParts = path.parse(source);
+    var destParts = path.parse(destination);
+    if (destParts.base == "") {
+        destParts = getFileAtDestinationFolder(sourceParts, destParts);
+    }
+
+    destParts = addPathSeparatorsIfNecessary(destParts);
+
+    if (!fs.existsSync(destParts.dir)) {
+        return error(`Destination folder [${ destParts.dir }] does not exist.`);
+    }
+
+    destination = path.format(destParts);
+
+    logger.trace(`  Destination: ${ destination }`);
     var result = success({ 'source': source, 'destination': destination });
     return result;
 }
 
-function getFilenameAtRoot(source, destParts) {
-    const sourceParts = path.parse(source);
-
-    if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
-        destParts.root += path.sep;
-    }
-    if (destParts.dir.length == 0 || destParts.dir.slice(-1) != path.sep) {
-        destParts.dir += path.sep;
-    }
-
+function getFileAtDestinationFolder(sourceParts, destParts) {
     destParts.base = sourceParts.base;
     destParts.ext = sourceParts.ext;
     destParts.name = sourceParts.name;
+    return destParts;
+}
 
-    const destination = path.format(destParts);
-
-    return destination;
+function addPathSeparatorsIfNecessary(destParts) {
+    var result = Object.assign({}, destParts);
+    if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
+        result.root += path.sep;
+        result.dir += path.sep;
+    }
+    return result;
 }
 
 module.exports = {

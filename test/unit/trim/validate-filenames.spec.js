@@ -15,7 +15,6 @@ const { validateFileNames } = require(src + '/trim/validate-filenames');
 
 describe('validate-filenames', () => {
 
-
     beforeEach(() => {
         logger.disable();
     });
@@ -86,9 +85,15 @@ describe('validate-filenames', () => {
         );
     });
 
-    it(`validateFileNames - setting the destination path to the drive root without a path separator sets the destination to the source filename at the drive root`, () => {
+    it(`validateFileNames - [win32] - setting the destination path to the drive root without a path separator (e.g., "e:") sets the destination to the source filename at the drive root`, () => {
+        if (process.platform !== "win32") {
+            return;
+        }
+
         const source = existingSource;
-        var root = driveRoot.slice(0, 2);  // e.g., 'E:'
+        const root = driveRoot.slice(0, 2);  // e.g., 'E:'
+        const expected = root + separator + path.basename(source);
+        // console.log('expected', expected);
 
         const result = validateFileNames(source, root);
 
@@ -97,20 +102,30 @@ describe('validate-filenames', () => {
                 error: null,
                 code: 0,
                 source: existingSource,
-                destination: root + separator + path.basename(source)
+                destination: expected
             }
         );
     });
 
+    it(`validateFileNames - setting the destination path to an empty string sets the destination to the pipe`, () => {
+        const source = existingSource;
+
+        const result = validateFileNames(source, "");
+
+        assert.deepEqual(result,
+            {
+                error: null,
+                code: 0,
+                source: existingSource,
+                destination: null
+            }
+        );
+    });
+
+
     it(`validateFileNames - setting the destination path to the drive root with a path separator sets the destination to the source filename at the drive root`, () => {
         const source = existingSource;
-        var root = driveRoot;  // e.g., 'E:\'
-        var sourceParts = path.parse(source);
-        var destParts = path.parse(driveRoot);
-        destParts.base = sourceParts.base;
-        destParts.ext = sourceParts.ext;
-        destParts.name = sourceParts.name;
-        const dest = path.format(destParts);
+        var root = driveRoot;  // e.g., 'E:\' or '/'
 
         const result = validateFileNames(source, root);
 
@@ -119,7 +134,7 @@ describe('validate-filenames', () => {
                 error: null,
                 code: 0,
                 source: existingSource,
-                destination: dest
+                destination: root + path.basename(source)
             }
         );
     });
