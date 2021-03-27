@@ -58,9 +58,11 @@ function getFileAtDestinationFolder(sourceParts, destParts) {
 
 function addPathSeparatorsIfNecessary(destParts) {
     var result = Object.assign({}, destParts);
-    if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
-        result.root += path.sep;
-        result.dir += path.sep;
+    if (process.platform === "win32") {
+        if (destParts.root.length == 0 || destParts.root.slice(-1) != path.sep) {
+            result.root += path.sep;
+            result.dir += path.sep;
+        }
     }
     return result;
 }
