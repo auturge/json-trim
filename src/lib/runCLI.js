@@ -1,8 +1,14 @@
 "use strict";
 
-const pkgJSON = require('../../package.json');
-const title = pkgJSON.name;
-process.title = title;
+const command = 'json-trim';
+const pkgMetadata = require('./utils/PackageMetadata')
+    .PackageMetadata.get([
+        '../package.json', // dist
+        './package.json', // dev
+    ]);
+const pkgName = pkgMetadata.name;
+const version = pkgMetadata.version;
+process.title = pkgName;
 
 const { options: coloretteOptions } = require('colorette');
 const levenshtein = require('fastest-levenshtein');
@@ -17,11 +23,11 @@ const JsonTrim = require('./JsonTrim');
 const runCLI = (cliArgs) => {
 
     CLIHelpProvider
-        .configure(pkgJSON, flags, logger)
+        .configure(pkgName, command, version, flags, logger)
         .handle(cliArgs);
 
     const parsedArgs = ArgParser
-        .configure(title, flags, groups, logger)
+        .configure(pkgName, flags, groups, logger)
         .parse(cliArgs, true);
 
     logger.setOptions(parsedArgs.opts);

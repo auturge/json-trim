@@ -8,7 +8,7 @@ class JsonTrim {
 
     run(args) {
         // args may be empty, since it could all be handled by the default config file.
-        logger.mark('json-trim::run');
+        logger.mark('JsonTrim::run');
         logger.debug('Starting json-trim.');
 
         const options = getConfigObject(args);

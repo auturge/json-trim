@@ -1,4 +1,5 @@
 const fs = require("fs");
+const isValidPath = require("is-valid-path");
 
 class LoadResult {
     content = undefined;
@@ -10,6 +11,11 @@ function load(absolutePath) {
 
     if (absolutePath == null || !absolutePath.length) {
         result.error = "Argument [absolutePath] must not be null, undefined, or empty string.";
+        return result;
+    }
+
+    if (!isValidPath(absolutePath)) {
+        result.error = `Argument [absolutePath] is not a valid path: ${ absolutePath }`;
         return result;
     }
 

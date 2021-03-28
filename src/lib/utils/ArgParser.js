@@ -8,9 +8,9 @@ const DEFAULT_OPTS = {
 class ArgParser {
 
     /** Creates a new instance of the command-line argument parser.
-     * @param {*} title
-     * @param {*} flags
-     * @param {*} groups
+     * @param {String} title
+     * @param {String} flags
+     * @param {String} groups
      * @param {*} logger
      * @returns {ArgParser} A new `ArgParser` instance.
      */
@@ -19,15 +19,19 @@ class ArgParser {
     }
 
     /** Creates a new instance of the command-line argument parser.
-     * @param {*} title
-     * @param {*} flags
-     * @param {*} groups
-     * @param {*} commands
+     * @param {String} title
+     * @param {String} flags
+     * @param {String} groups
      * @param {*} logger
      * @returns {ArgParser} A new `ArgParser` instance.
      */
     constructor(title, flags, groups, logger = console) {
-        // TODO: guard code
+        if (!(title && title.length)) {
+            throw new Error('ArgParser [title] must not be null, undefined, or empty string.')
+        }
+        if (!(flags && flags.length)) {
+            throw new Error('ArgParser [flags] must not be null, undefined, or empty array.')
+        }
 
         this.options = {
             title: title,

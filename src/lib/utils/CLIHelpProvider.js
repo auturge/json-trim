@@ -10,8 +10,8 @@ class CLIHelpProvider {
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
-    static configure(pkgJSON, flags, logger = console) {
-        return new CLIHelpProvider(pkgJSON, flags, logger);
+    static configure(packageName, command, version, flags, logger = console) {
+        return new CLIHelpProvider(packageName, command, version, flags, logger);
     }
 
     /** Creates a new instance of the command-line help provider.
@@ -21,18 +21,24 @@ class CLIHelpProvider {
      * @param {*} logger
      * @returns {CLIHelpProvider} A new `CLIHelpProvider` instance.
      */
-    constructor(pkgJSON, flags, logger = console) {
-        if (!pkgJSON || !pkgJSON.name || pkgJSON.version == null) {
-            throw new Error('Must provide a valid package.json object.');
+    constructor(packageName, command, version, flags, logger = console) {
+        if (!packageName || !packageName.length) {
+            throw new Error('Argument [packageName] must not be null, undefined, or empty string.');
+        }
+        if (!command || !command.length) {
+            throw new Error('Argument [command] must not be null, undefined, or empty string.');
+        }
+        if (!version || !version.length) {
+            throw new Error('Argument [version] must not be null, undefined, or empty string.');
         }
         if (!flags) {
             throw new Error('Must specify a set of flags/options.');
         }
 
         this.options = {
-            packageJSON: pkgJSON,
-            title: pkgJSON.name,
-            version: pkgJSON.version,
+            packageName: packageName,
+            command: command,
+            version: version,
             flags: flags,
         }
         this.logger = logger;
@@ -100,12 +106,12 @@ class CLIHelpProvider {
     _printSubHelp = (subject) => {
         const info = this.options.flags;
         // Contains object with details about given subject
-        const option = info.find((commandOrFlag) => {
-            return commandOrFlag.name === subject.slice(2) || commandOrFlag.alias === subject.slice(1);
+        const option = info.find((flag) => {
+            return flag.name === subject.slice(2) || flag.alias === subject.slice(1);
         });
 
         const flagAlias = option.alias ? (` -${ option.alias },`) : '';
-        const usage = yellow(`${ this.options.title }${ flagAlias } ${ option.usage }`);
+        const usage = yellow(`${ this.options.command }${ flagAlias } ${ option.usage }`);
         const description = option.description;
         const link = option.link;
 
@@ -129,7 +135,7 @@ class CLIHelpProvider {
         const invalidArgs = this._hasUnknownArgs(args, this.allNames);
         if (invalidArgs.length > 0) {
             this.logger.error(`Error: Invalid option '${ invalidArgs[ 0 ] }'.`);
-            this.logger.info(`Run ${ this.options.title } --help to see available commands and arguments.\n`);
+            this.logger.info(`Run ${ this.options.command } --help to see available commands and arguments.\n`);
             return process.exit(2);
         }
     };
@@ -141,7 +147,8 @@ class CLIHelpProvider {
 
     _getCommandLineUsageOptions = () => {
         const flags = this.options.flags;
-        const title = this.options.title;
+        const command = this.options.command;
+        const packageName = this.options.packageName;
 
         const o = (s) => yellow(s);
         const negatedFlags = flags
@@ -153,13 +160,13 @@ class CLIHelpProvider {
                     type: Boolean
                 } ];
             }, []);
-        const titleText = bold('⬡                     ') + underline(title) + bold('                     ⬡');
+        const titleText = bold('⬡                     ') + underline(packageName) + bold('                     ⬡');
 
         // const desc = 'The build tool for modern web applications';
         // const websitelink = '         ' + underline('https://webpack.js.org');
 
-        const usage = bold('Usage') + ': ' + '`' + o(`${ title } [...options]`) + '`';
-        const examples = bold('Example') + ': ' + '`' + o(`${ title } help --flag`) + '`';
+        const usage = bold('Usage') + ': ' + '`' + o(`${ command } [...options]`) + '`';
+        const examples = bold('Example') + ': ' + '`' + o(`${ command } help --flag`) + '`';
 
         const hh = `          ` +
             `${ titleText }` + `\n\n` +
@@ -201,7 +208,7 @@ class CLIHelpProvider {
     _outputVersion = (args) => {
         this._printInvalidArgError(args);
 
-        this.logger.log(`\n${ this.options.title } ${ this.options.version }\n`);
+        this.logger.log(`\n${ this.options.packageName } ${ this.options.version }\n`);
     };
 
     // Contains an array of strings with core cli flags and their aliases

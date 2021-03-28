@@ -5,7 +5,7 @@ const logger = require('../utils/logging').getSingleton('json-trim');
 const { error, success } = require('../utils/results');
 
 function validateFileNames(source, destination) {
-    logger.mark('trim::validateFileNames');
+    logger.mark('validate-filenames::validateFileNames');
     logger.debug('Validating filenames...');
 
     console.log('source', source);

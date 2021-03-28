@@ -1,13 +1,18 @@
 const src = "../../../src/lib";
 const testObjects = "../../objects";
 
+const path = require('path');
 const fs = require("fs");
 const sinon = require('sinon');
 const { assert } = require('chai');
-const { AnyRandom } = require('@auturge/testing');
+const { AnyRandom, CharacterSet } = require('@auturge/testing');
+const {
+    existingSource, invalidDestination,
+    validDestination, existingJS
+} = require(testObjects + '/paths');
 
 const { unwrap } = require(testObjects + "/helpers");
-const json = require(testObjects + '/test.package.json')
+const json = require(existingSource)
 
 const { load } = require(src + '/utils/json-loader');
 
@@ -30,7 +35,7 @@ describe('json-loader', () => {
         });
 
         it(`load - returns an error when the absolutePath does not exist`, () => {
-            const absolutePath = AnyRandom.string(5, 10);
+            const absolutePath = validDestination + AnyRandom.char(CharacterSet.ALPHA);
 
             const result = load(absolutePath);
 
@@ -38,10 +43,20 @@ describe('json-loader', () => {
             assert.equal(result.error, `File [${ absolutePath }] does not exist.`);
         });
 
-        it(`load - returns an error when it cannot read the file`, () => {
-            const stub = sinon.stub(fs, "readFileSync").throws();
+        it(`load - returns an error when the absolutePath is not a valid path`, () => {
+            const absolutePath = invalidDestination;
+            const expected = `Argument [absolutePath] is not a valid path: ${ absolutePath }`;
 
-            const absolutePath = './src/lib/utils/json-loader.js';
+            const result = load(invalidDestination);
+
+            assert.equal(result.content, undefined);
+            assert.equal(result.error, expected);
+        });
+
+
+        it(`load - returns an error when it cannot read the file`, () => {
+            sinon.stub(fs, "readFileSync").throws();
+            const absolutePath = existingSource;
 
             const result = load(absolutePath);
 
@@ -52,7 +67,7 @@ describe('json-loader', () => {
         });
 
         it(`load - returns an error when the file is not JSON`, () => {
-            const absolutePath = './src/lib/utils/json-loader.js';
+            const absolutePath = existingJS;
 
             const result = load(absolutePath);
 
@@ -61,7 +76,7 @@ describe('json-loader', () => {
         });
 
         it(`load - returns the file content when the file exists and is JSON`, () => {
-            const absolutePath = './test/objects/test.package.json';
+            const absolutePath = existingSource;
 
             const result = load(absolutePath);
 

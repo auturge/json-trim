@@ -12,38 +12,35 @@ const logger = require(src + "/utils/logging").getSingleton('unit-test');
 const { flags, groups } = require(src + '/trim/cli-options');
 const { CLIHelpProvider } = require(src + '/utils/CLIHelpProvider');
 
-const packageJSON = {
-    name: AnyRandom.string(5, 8, CharacterSet.ALPHA),
-    version: AnyRandom.int(0, 5)
-};
-
 describe('CLIHelpProvider', () => {
 
     var provider;
-    var help, version, exit, exited;
-    var error, info, log;
+    const command = AnyRandom.string(5, 8, CharacterSet.ALPHA);
+    const packageName = AnyRandom.string(5, 8, CharacterSet.ALPHA);
+    const packageVersion = AnyRandom.int(0, 5).toString();
+    var help, version, exit, error, info, log;
 
     function oneOf(array) {
         return array[ array.length * Math.random() << 0 ];
     }
 
     function getProvider(flags) {
-        return CLIHelpProvider.configure(packageJSON, flags, logger);
+        return CLIHelpProvider.configure(packageName, command, packageVersion, flags, logger);
     }
 
     describe('configure', () => {
         it('configure - sets properties correctly', () => {
-            var parser = CLIHelpProvider.configure(packageJSON, flags, logger);
+            var parser = CLIHelpProvider.configure(packageName, command, packageVersion, flags, logger);
 
-            assert.deepEqual(parser.options.packageJSON, packageJSON);
-            assert.equal(parser.options.title, packageJSON.name);
-            assert.equal(parser.options.version, packageJSON.version);
+            assert.deepEqual(parser.options.packageName, packageName);
+            assert.equal(parser.options.command, command);
+            assert.equal(parser.options.version, packageVersion);
             assert.deepEqual(parser.options.flags, flags);
             assert.equal(parser.logger, logger);
         });
 
         it('configure - uses console as the default logger', () => {
-            var parser = CLIHelpProvider.configure(packageJSON, flags);
+            var parser = CLIHelpProvider.configure(packageName, command, packageVersion, flags);
 
             assert.equal(parser.logger, console);
         });
@@ -51,30 +48,57 @@ describe('CLIHelpProvider', () => {
 
     describe('ctor', () => {
         it('ctor - sets properties correctly', () => {
-            var parser = new CLIHelpProvider(packageJSON, flags, logger);
+            var parser = new CLIHelpProvider(packageName, command, packageVersion, flags, logger);
 
-            assert.deepEqual(parser.options.packageJSON, packageJSON);
-            assert.equal(parser.options.title, packageJSON.name);
-            assert.equal(parser.options.version, packageJSON.version);
+            assert.deepEqual(parser.options.packageName, packageName);
+            assert.equal(parser.options.command, command);
+            assert.equal(parser.options.version, packageVersion);
             assert.deepEqual(parser.options.flags, flags);
             assert.equal(parser.logger, logger);
         });
 
         it('ctor - uses console as the default logger', () => {
-            var parser = new CLIHelpProvider(packageJSON, flags);
+            var parser = new CLIHelpProvider(packageName, command, packageVersion, flags);
 
             assert.equal(parser.logger, console);
         });
 
         [
             { key: 'null', value: null },
-            { key: 'undefined', value: undefined }
+            { key: 'undefined', value: undefined },
+            { key: 'empty string', value: "" },
         ].forEach(({ key, value }) => {
-            it(`ctor - throws if pkgJSON argument is ${ key }`, () => {
+            it(`ctor - throws if packageName argument is ${ key }`, () => {
 
                 assert.throws(() => {
-                    new CLIHelpProvider(value, flags, groups);
-                }, 'Must provide a valid package.json object.');
+                    new CLIHelpProvider(value, command, packageVersion, flags, groups);
+                }, 'Argument [packageName] must not be null, undefined, or empty string.');
+            });
+        });
+
+        [
+            { key: 'null', value: null },
+            { key: 'undefined', value: undefined },
+            { key: 'empty string', value: "" },
+        ].forEach(({ key, value }) => {
+            it(`ctor - throws if version argument is ${ key }`, () => {
+
+                assert.throws(() => {
+                    new CLIHelpProvider(packageName, command, value, flags, groups);
+                }, 'Argument [version] must not be null, undefined, or empty string.');
+            });
+        });
+
+        [
+            { key: 'null', value: null },
+            { key: 'undefined', value: undefined },
+            { key: 'empty string', value: "" },
+        ].forEach(({ key, value }) => {
+            it(`ctor - throws if command argument is ${ key }`, () => {
+
+                assert.throws(() => {
+                    new CLIHelpProvider(packageName, value, packageVersion, flags, groups);
+                }, 'Argument [command] must not be null, undefined, or empty string.');
             });
         });
 
@@ -85,7 +109,7 @@ describe('CLIHelpProvider', () => {
             it(`ctor - throws if flags argument is ${ key }`, () => {
 
                 assert.throws(() => {
-                    new CLIHelpProvider(packageJSON, value, groups);
+                    new CLIHelpProvider(packageName, command, packageVersion, value, groups);
                 }, 'Must specify a set of flags/options.');
             });
         });
@@ -93,24 +117,7 @@ describe('CLIHelpProvider', () => {
         it(`ctor - does not throw if flags argument is an empty array`, () => {
 
             assert.doesNotThrow(() => {
-                new CLIHelpProvider(packageJSON, [], groups);
-            });
-        });
-
-        [
-            { prop: 'name' },
-            { prop: 'version' }
-        ].forEach(({ prop }) => {
-            it(`ctor - throws if pkgJSON argument has no ${ prop } property`, () => {
-                var packageJSON = {
-                    name: AnyRandom.string(5, 8, CharacterSet.ALPHA),
-                    version: AnyRandom.int(0, 5)
-                }
-                delete packageJSON[ prop ];
-
-                assert.throws(() => {
-                    new CLIHelpProvider(packageJSON, flags, groups);
-                }, 'Must provide a valid package.json object.');
+                new CLIHelpProvider(packageName, command, packageVersion, [], groups);
             });
         });
     });
@@ -279,7 +286,7 @@ describe('CLIHelpProvider', () => {
 
         it('_outputVersion - displays the version', () => {
             const cliArgs = [ '--' + oneOf(flags).name ];
-            const expected = `\n${ packageJSON.name } ${ packageJSON.version }\n`
+            const expected = `\n${ packageName } ${ packageVersion }\n`
 
             provider[ '_outputVersion' ](cliArgs);
 
@@ -358,7 +365,7 @@ describe('CLIHelpProvider', () => {
             provider = getProvider(flags);
             _displayText = sinon.spy(provider, '_displayText');
             const subject = '--' + option.name;
-            const expectedUsage = yellow(`${ packageJSON.name } -${ option.alias }, ${ option.usage }`);
+            const expectedUsage = yellow(`${ command } -${ option.alias }, ${ option.usage }`);
             const expectedDescription = option.description;
             const expectedLink = option.link;
 
@@ -382,7 +389,7 @@ describe('CLIHelpProvider', () => {
             provider = getProvider(flags);
             _displayText = sinon.spy(provider, '_displayText');
             const subject = '-' + option.alias;
-            const expectedUsage = yellow(`${ packageJSON.name } -${ option.alias }, ${ option.usage }`);
+            const expectedUsage = yellow(`${ command } -${ option.alias }, ${ option.usage }`);
             const expectedDescription = option.description;
             const expectedLink = option.link;
 
@@ -406,7 +413,7 @@ describe('CLIHelpProvider', () => {
             provider = getProvider(flags);
             _displayText = sinon.spy(provider, '_displayText');
             const subject = '--' + option.name;
-            const expectedUsage = yellow(`${ packageJSON.name } ${ option.usage }`);
+            const expectedUsage = yellow(`${ command } ${ option.usage }`);
             const expectedDescription = option.description;
 
             provider[ '_printSubHelp' ](subject);
@@ -428,7 +435,7 @@ describe('CLIHelpProvider', () => {
             provider = getProvider(flags);
             _displayText = sinon.spy(provider, '_displayText');
             const subject = '-' + option.alias;
-            const expectedUsage = yellow(`${ packageJSON.name } -${ option.alias }, ${ option.usage }`);
+            const expectedUsage = yellow(`${ command } -${ option.alias }, ${ option.usage }`);
             const expectedDescription = option.description;
 
             provider[ '_printSubHelp' ](subject);
@@ -520,7 +527,7 @@ describe('CLIHelpProvider', () => {
         it('_printInvalidArgError - logs an error and exits when there are invalid flags', () => {
             const invalidArgs = [ '--' + AnyRandom.string(5, 5, CharacterSet.ALPHA) ];
             const errMessage = `Error: Invalid option '${ invalidArgs[ 0 ] }'.`;
-            const infoMessage = `Run ${ packageJSON.name } --help to see available commands and arguments.\n`;
+            const infoMessage = `Run ${ command } --help to see available commands and arguments.\n`;
 
             provider[ '_printInvalidArgError' ](invalidArgs);
 
@@ -542,7 +549,6 @@ describe('CLIHelpProvider', () => {
 
         it('_getCommandLineUsageOptions - gets the correct options, given flags', () => {
             provider = getProvider(flags);
-            const title = packageJSON.name;
             const negatedFlags = flags
                 .filter((flag) => flag.negative)
                 .reduce((allFlags, flag) => {
@@ -552,9 +558,9 @@ describe('CLIHelpProvider', () => {
                         type: Boolean
                     } ];
                 }, []);
-            const titleText = bold('⬡                     ') + underline(title) + bold('                     ⬡');
-            const usage = bold('Usage') + ': ' + '`' + yellow(`${ title } [...options]`) + '`';
-            const examples = bold('Example') + ': ' + '`' + yellow(`${ title } help --flag`) + '`';
+            const titleText = bold('⬡                     ') + underline(packageName) + bold('                     ⬡');
+            const usage = bold('Usage') + ': ' + '`' + yellow(`${ command } [...options]`) + '`';
+            const examples = bold('Example') + ': ' + '`' + yellow(`${ command } help --flag`) + '`';
             const hh = `          ` +
                 `${ titleText }` + `\n\n` +
                 `${ usage }` + `\n\n` +
@@ -584,10 +590,9 @@ describe('CLIHelpProvider', () => {
         it('_getCommandLineUsageOptions - gets the correct options, given NO flags', () => {
             const flags = [];
             provider = getProvider(flags);
-            const title = packageJSON.name;
-            const titleText = bold('⬡                     ') + underline(title) + bold('                     ⬡');
-            const usage = bold('Usage') + ': ' + '`' + yellow(`${ title } [...options]`) + '`';
-            const examples = bold('Example') + ': ' + '`' + yellow(`${ title } help --flag`) + '`';
+            const titleText = bold('⬡                     ') + underline(packageName) + bold('                     ⬡');
+            const usage = bold('Usage') + ': ' + '`' + yellow(`${ command } [...options]`) + '`';
+            const examples = bold('Example') + ': ' + '`' + yellow(`${ command } help --flag`) + '`';
             const hh = `          ` +
                 `${ titleText }` + `\n\n` +
                 `${ usage }` + `\n\n` +

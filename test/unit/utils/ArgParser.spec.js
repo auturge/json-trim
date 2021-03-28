@@ -14,7 +14,7 @@ const { ArgParser } = require(src + '/utils/ArgParser');
 describe('ArgParser', () => {
 
     var argParser;
-    var title;
+    var title = AnyRandom.string(5, 8, CharacterSet.ALPHA);
 
     // TODO figure out why I'm only getting 13/16 "functions" coverage
 

@@ -1,5 +1,5 @@
 {
-    "name": "jtrim",
+    "name": "@auturge/json-trim",
     "description": "Copies a json file, trimming out all but a select list of keys.",
     "version": "1.0.0",
     "author": "auturge",
@@ -15,8 +15,8 @@
     "engines": {
         "node": ">=12.8.1"
     },
-    "bin": "./bin/cli.js",
-    "main": "./lib/json-trim.js",
+    "bin": "./bin/json-trim.js",
+    "main": "./lib/JsonTrim.js",
     "devDependencies": {
         "@auturge/testing": "latest",
         "chai": "^4.3.0",
@@ -51,7 +51,7 @@
         "package": "npm-run-all clean ~mkdir:dist ~copy",
         "~copy": "npm-run-all ~copy:readme ~copy:source ~copy:license ~copy:changelog ~copy:package:json",
         "~copy:changelog": "shx cp ./CHANGELOG.md ./dist",
-        "~copy:package:json": "node ./src/bin/cli -c ./conf/trim.config.js --env=dist",
+        "~copy:package:json": "node ./src/bin/json-trim -c ./conf/trim.config.js --env=dist",
         "~copy:readme": "shx cp ./README.md ./dist",
         "~copy:source": "shx cp -R ./src/lib ./src/bin ./src/resource ./src/index.js ./dist/",
         "~copy:license": "shx cp ./LICENSE ./dist",
@@ -62,19 +62,19 @@
         "------------": "------------------------------------------------------------",
         "package-v": "npm-run-all clean ~mkdir:dist ~copy-verbose",
         "~copy-verbose": "npm-run-all ~copy:readme ~copy:source ~copy:license ~copy:changelog ~copy:package:json:verbose",
-        "~copy:package:json:verbose": "node ./src/bin/cli -c ./conf/trim.config.js --env=dist --verbose",
-        "js": "node ./src/bin/cli -c ./conf/trim.config.js",
-        "override": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json",
-        "env": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json --env=dog",
-        "w": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json --env production=staging --env dog -w name -w version -w description",
-        "h": "node ./src/bin/cli -h",
-        "hs": "node ./src/bin/cli help -s",
-        "hq": "node ./src/bin/cli help --quiet",
-        "help": "node ./src/bin/cli --help",
-        "v": "node ./src/bin/cli -v",
-        "trim": "node ./src/bin/cli",
-        "ver": "node ./src/bin/cli -ver",
-        "dev": "node ./src/bin/cli -c ./conf/trim.config.js -s ./package.json --env dev --env type=test -k one two three",
-        "prod": "node ./src/bin/cli -c ./test/trim.config.prod.js"
+        "~copy:package:json:verbose": "node ./src/bin/json-trim -c ./conf/trim.config.js --env=dist --verbose",
+        "js": "node ./src/bin/json-trim -c ./conf/trim.config.js",
+        "override": "node ./src/bin/json-trim -c ./conf/trim.config.js -s ./package.json",
+        "env": "node ./src/bin/json-trim -c ./conf/trim.config.js -s ./package.json --env=dog",
+        "w": "node ./src/bin/json-trim -c ./conf/trim.config.js -s ./package.json --env production=staging --env dog -w name -w version -w description",
+        "h": "node ./src/bin/json-trim -h",
+        "hs": "node ./src/bin/json-trim help -s",
+        "hq": "node ./src/bin/json-trim help --quiet",
+        "help": "node ./src/bin/json-trim --help",
+        "v": "node ./src/bin/json-trim -v",
+        "trim": "node ./src/bin/json-trim",
+        "ver": "node ./src/bin/json-trim -ver",
+        "dev": "node ./src/bin/json-trim -c ./conf/trim.config.js -s ./package.json --env dev --env type=test -k one two three",
+        "prod": "node ./src/bin/json-trim -c ./test/trim.config.prod.js"
     }
 }

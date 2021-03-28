@@ -7,6 +7,8 @@ const _existingSource = path.resolve(process.cwd(), './test/objects/test.package
 
 const _validDestination = path.resolve(process.cwd(), './test/objects/test.output.json');
 
+const _existingJS = path.resolve(process.cwd(), './src/lib/utils/json-loader.js');
+
 const _invalidSource = (() => {
     var invalidSource = _existingSource;
     while (fs.existsSync(invalidSource)) {
@@ -33,6 +35,7 @@ const _validDriveRoot = (() => {
 module.exports = {
     existingSource: _existingSource,
     validDestination: _validDestination,
+    existingJS: _existingJS,
     invalidSource: _invalidSource,
     invalidDestination: _invalidDestination,
     driveRoot: _validDriveRoot,

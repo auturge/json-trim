@@ -15,7 +15,7 @@ const logger = Logger.getSingleton('json-trim');
 
 /** Load and parse a configuration file, then merge in command-line options */
 function getConfigObject(cliOptions) {
-    logger.mark('jt_config::getConfigObject');
+    logger.mark('getConfigObject::getConfigObject');
     logger.debug('Generating a runtime configuration object.');
     logger.trace('options from the command-line:', cliOptions);
 
@@ -27,8 +27,8 @@ function getConfigObject(cliOptions) {
     logger.trace('base configuration options:', options);
 
     logger.trace('Merging configuration into base options...');
-    logger.mark('config::getConfigurationObject');
-    var config = gco.getConfigurationObject(DEFAULT_CONFIG, './trim.config.js', options.config);
+    logger.mark('getConfigObject::getConfigurationObject');
+    var config = gco.getConfigurationObject(DEFAULT_CONFIG, null, './trim.config.js', options.config);
     logger.trace('Configured object:', config);
 
     // apply json-trim specific overrides
@@ -47,7 +47,7 @@ function getConfigObject(cliOptions) {
 
 /** Apply the CLI options to the config */
 function applyOverridesToConfig(config, opts) {
-    logger.mark('jt_config::applyOverridesToConfig');
+    logger.mark('getConfigObject::applyOverridesToConfig');
     logger.debug('Applying the CLI options to the configuration object.');
 
     logger.beginPartial(LogLevel.DEBUG, 'Applying overrides... ');
@@ -100,7 +100,7 @@ function getAbsolutePath(candidate) {
 
 /** Make sure the options object has all the required properties */
 function marshalParsedOptionsIntoMinimalConfigOptions(parsedOpts) {
-    logger.mark('jt_config::marshalParsedOptionsIntoMinimalConfigOptions');
+    logger.mark('getConfigObject::marshalParsedOptionsIntoMinimalConfigOptions');
     logger.debug('Ensuring the config object has the correct shape.');
 
     // the final output needs/must include:
@@ -122,7 +122,7 @@ function marshalParsedOptionsIntoMinimalConfigOptions(parsedOpts) {
 
 /** Given a config object, resolves the list of keys */
 function resolveKeyList(config) {
-    logger.mark('jt_config::resolveKeyList');
+    logger.mark('getConfigObject::resolveKeyList');
 
     logger.beginPartial(LogLevel.DEBUG, 'Resolving the keylist... ');
 
@@ -167,10 +167,11 @@ function resolveKeyList(config) {
 
 /** Validate the runtime configuration paths */
 function validateConfigPaths(config) {
-    logger.mark('jt_config::validateConfigPaths');
+    logger.mark('getConfigObject::validateConfigPaths');
     logger.trace('  config:', JSON.stringify(config, null, 2));
 
     logger.beginPartial(LogLevel.DEBUG, 'Validating paths... ');
+
     function isFieldMissing(field) {
         // determine if the property is null or undefined (unset).
         return config[ field ] == null;
