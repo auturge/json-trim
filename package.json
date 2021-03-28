@@ -1,5 +1,5 @@
 {
-    "name": "json-trim",
+    "name": "jtrim",
     "description": "Copies a json file, trimming out all but a select list of keys.",
     "version": "1.0.0",
     "author": "auturge",
