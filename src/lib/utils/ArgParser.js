@@ -25,12 +25,9 @@ class ArgParser {
      * @param {*} logger
      * @returns {ArgParser} A new `ArgParser` instance.
      */
-    constructor(title, flags, groups, logger = console) {
+    constructor(title, flags = [], groups = [], logger = console) {
         if (!(title && title.length)) {
-            throw new Error('ArgParser [title] must not be null, undefined, or empty string.')
-        }
-        if (!(flags && flags.length)) {
-            throw new Error('ArgParser [flags] must not be null, undefined, or empty array.')
+            throw new Error('Argument [title] must not be null, undefined, or empty string.')
         }
 
         this.options = {

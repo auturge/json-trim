@@ -45,10 +45,27 @@ describe('ArgParser', () => {
             assert.equal(parser.logger, logger);
         });
 
-        it('configure - uses console as the default logger', () => {
-            var parser = new ArgParser(title, flags, groups);
+        it('configure - uses correct defaults', () => {
+            var parser = new ArgParser(title);
 
             assert.equal(parser.logger, console);
+            assert.isTrue(Array.isArray(parser.options.flags));
+            assert.isTrue(Array.isArray(parser.options.groups));
+            assert.equal(parser.options.flags.length, 0);
+            assert.equal(parser.options.groups.length, 0);
+        });
+
+        [
+            { key: 'null', value: null },
+            { key: 'undefined', value: undefined },
+            { key: 'empty string', value: "" },
+        ].forEach(({ key, value }) => {
+            it(`ctor - throws if title argument is ${ key }`, () => {
+
+                assert.throws(() => {
+                    new ArgParser(value, flags, groups, logger);
+                }, 'Argument [title] must not be null, undefined, or empty string.');
+            });
         });
     });
 
