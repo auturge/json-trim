@@ -1,7 +1,7 @@
 {
     "name": "json-trim",
     "description": "Copies a json file, trimming out all but a select list of keys.",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "author": "auturge",
     "license": "MIT",
     "bugs": {
